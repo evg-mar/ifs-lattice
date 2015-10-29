@@ -1,1 +1,1 @@
-# ifs-lattice yo
+# ifs-lattice y
