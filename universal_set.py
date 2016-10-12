@@ -7,7 +7,8 @@ import pandas as pd
 class UniversalSet(object):
 
     def __init__(self, words_set=None):
-        if not words_set:
+        
+        if words_set is None:
             words_set = set()
 
         self._index_to_words = []
@@ -65,21 +66,17 @@ class UniversalSet(object):
             next_idx += 1
 
     def get_index(self, word, default=None):
-
         return self._words_to_index.get(word, default)
 
     def get_word(self, idx, default=None):
-
-        if idx > len(self._index_to_words):
-            return default
-        else:
-            return self._index_to_words[idx]
+        
+        return default if idx > len(self._index_to_words) \
+                       else self._index_to_words[idx]
 
     def characteristic_indices(self, words):
 
         indices = set([self.get_index(w, None) for w in words])
         indices.discard(None)
-
         return indices
 
     def check_consistancy(self):
@@ -91,6 +88,9 @@ class UniversalSet(object):
             result = False
             msg = ('Inconsistant correspondance of the length of \
             indexes and words')
+
+        logging.info(msg)
+        return result
 
         for w, idx in self._words_to_index.iteritems():
             if w != self._index_to_words[idx]:

@@ -9,11 +9,13 @@ class TriangPoset(object):
 
     @abc.abstractmethod
     def eq(self, first, second):
-         """Returns:
-         True - iff the elements are equal in the poset.
-         None - iff the elements are not comparable
-         Raise exception iff they are not of comparable classes"""
-         return
+        """
+        Return
+        True - iff the elements are equal in the poset.
+        None - iff the elements are not comparable
+        Raise exception iff they are not of comparable classes
+        """
+        return
 
     @abc.abstractmethod
     def leq(self, first, second):
@@ -32,7 +34,7 @@ class TriangPoset(object):
         return
 
     def neq(self, first, second):
-         return not self.eq(first, second)
+        return not self.eq(first, second)
 
     def lt(self, first, second):
         return self.neq(first, second) and self.leq(first, second)
@@ -62,12 +64,10 @@ class StdTriangPoset(TriangPoset):
 #         if not self.is_correct(b):
 #             raise AssertionError("Second argument is not correct!")
 
+        mu = max([arg[0] for arg in args])
+        nu = max([arg[1] for arg in args])
 
-
-        mx = max([arg[0] for arg in args])
-        mn = max([arg[1] for arg in args])
-
-        return mx, mn
+        return mu,nu
 
     def inf(self, *args):
 #         if not self.is_correct(a):
@@ -75,10 +75,10 @@ class StdTriangPoset(TriangPoset):
 #         if not self.is_correct(b):
 #             raise AssertionError("Second argument is not correct!")
 
-        mn = max([arg[0] for arg in args])
-        mx = max([arg[1] for arg in args])
+        mu = min([arg[0] for arg in args])
+        nu = max([arg[1] for arg in args])
 
-        return mn, mx
+        return mu,nu
 
 class PiTriangPoset(TriangPoset):
 
@@ -90,32 +90,24 @@ class PiTriangPoset(TriangPoset):
 
     def is_correct(self, elem):
         mu, nu = elem[0], elem[1]
-        return (mu >= 0 and nu >= 0 and 0 <= mu + nu and mu + nu <= 1)
+        return (mu >= 0 and nu >= 0 and 0 <= mu + nu <= 1)
 
     def sup(self, *args):
 #         if not self.is_correct(a):
 #             raise AssertionError("First argument is not correct!")
 #         if not self.is_correct(b):
 #             raise AssertionError("Second argument is not correct!")
-
         mu = max([arg[0] for arg in args])
         nu = max([arg[1] for arg in args])
-
-        if self.is_correct(mu, nu):
-            return mu, nu
-        else:
-            return None
+        
+        return mu,nu if self.is_correct(mu, nu) else None
 
     def inf(self, *args):
 #         if not self.is_correct(a):
 #             raise AssertionError("First argument is not correct!")
 #         if not self.is_correct(b):
 #             raise AssertionError("Second argument is not correct!")
-
         mu = min([arg[0] for arg in args])
         nu = min([arg[1] for arg in args])
 
-        if self.is_correct(mu, nu):
-            return mu, nu
-        else:
-            return None
+        return mu,nu if self.is_correct(mu, nu) else None

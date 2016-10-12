@@ -1,12 +1,12 @@
-from lattice import *
+from lattice import TriangPoset
 from intuitionistic_fuzzy_set import *
 
 
 class IfsPoset(TriangPoset):
 
-    def __init__(self, TriangPosetType):
+    def __init__(self, triangPosetType):
 
-        self._base_poset = TriangPosetType()
+        self._base_poset = triangPosetType()
 
     def eq(self, a, b):
         return (a[0] == b[0] and a[1] == b[1])
