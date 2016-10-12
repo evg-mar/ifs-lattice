@@ -43,6 +43,7 @@ class TriangPoset(object):
     def gt(self, first, second):
         return self.lt(second, first)
 
+
 class StdTriangPoset(TriangPoset):
 
     def eq(self, a, b):
@@ -56,10 +57,12 @@ class StdTriangPoset(TriangPoset):
         return (mu >= 0 and nu >= 0 and 0 <= mu + nu and mu + nu <= 1)
 
     def sup(self, *args):
-        if not self.is_correct(a):
-            raise AssertionError("First argument is not correct!")
-        if not self.is_correct(b):
-            raise AssertionError("Second argument is not correct!")
+#         if not self.is_correct(a):
+#             raise AssertionError("First argument is not correct!")
+#         if not self.is_correct(b):
+#             raise AssertionError("Second argument is not correct!")
+
+
 
         mx = max([arg[0] for arg in args])
         mn = max([arg[1] for arg in args])
@@ -67,10 +70,10 @@ class StdTriangPoset(TriangPoset):
         return mx, mn
 
     def inf(self, *args):
-        if not self.is_correct(a):
-            raise AssertionError("First argument is not correct!")
-        if not self.is_correct(b):
-            raise AssertionError("Second argument is not correct!")
+#         if not self.is_correct(a):
+#             raise AssertionError("First argument is not correct!")
+#         if not self.is_correct(b):
+#             raise AssertionError("Second argument is not correct!")
 
         mn = max([arg[0] for arg in args])
         mx = max([arg[1] for arg in args])
@@ -90,10 +93,10 @@ class PiTriangPoset(TriangPoset):
         return (mu >= 0 and nu >= 0 and 0 <= mu + nu and mu + nu <= 1)
 
     def sup(self, *args):
-        if not self.is_correct(a):
-            raise AssertionError("First argument is not correct!")
-        if not self.is_correct(b):
-            raise AssertionError("Second argument is not correct!")
+#         if not self.is_correct(a):
+#             raise AssertionError("First argument is not correct!")
+#         if not self.is_correct(b):
+#             raise AssertionError("Second argument is not correct!")
 
         mu = max([arg[0] for arg in args])
         nu = max([arg[1] for arg in args])
@@ -104,10 +107,10 @@ class PiTriangPoset(TriangPoset):
             return None
 
     def inf(self, *args):
-        if not self.is_correct(a):
-            raise AssertionError("First argument is not correct!")
-        if not self.is_correct(b):
-            raise AssertionError("Second argument is not correct!")
+#         if not self.is_correct(a):
+#             raise AssertionError("First argument is not correct!")
+#         if not self.is_correct(b):
+#             raise AssertionError("Second argument is not correct!")
 
         mu = min([arg[0] for arg in args])
         nu = min([arg[1] for arg in args])

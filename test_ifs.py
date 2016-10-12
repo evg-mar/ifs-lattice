@@ -16,10 +16,10 @@ def main():
     a = 10
     # args = parse_arguments()
     #
-    #  logging.basicConfig(level=getattr(logging, args.log[0].upper()))
-    #  logging.info('Files matching script starting...')
+    # logging.basicConfig(level=getattr(logging, args.log[0].upper()))
+    # logging.info('Files matching script starting...')
 
-    return
+    print("Inside...")
 
 if __name__ == "__main__":
     main()

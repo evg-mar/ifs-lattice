@@ -2,7 +2,7 @@ import logging
 import inspect
 import operator
 
-#import pandas as pd
+import pandas as pd
 
 class UniversalSet(object):
 
@@ -30,7 +30,7 @@ class UniversalSet(object):
     def __getitem__(self, idx):
          return self._index_to_words[idx]
 
-    def to_csv(file_name, index=True):
+    def to_csv(self, file_name, index=True):
 
         col = ['word']
         report_df = pd.DataFrame(columns=col, index=['id'])
