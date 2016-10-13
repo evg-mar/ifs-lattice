@@ -27,13 +27,13 @@ class IFS(object):
 
     @classmethod
     def random(cls, universe, rang):
-
+        random.seed(a=1, version=2)
         result = cls(universe, rang)
-        ran = range(rang)
+        range_ = range(rang)
         result._selector = {}
 
         for idx in result._universe.indices():
-            sample = random.sample(ran, 2)
+            sample = random.sample(range_, 2)
             result._selector[idx] = (min(sample), rang - max(sample))
 
         return result
@@ -70,6 +70,19 @@ class IFS(object):
                      ]
 
         return set(supp_idxes)
+
+    def elements_split(self):
+        """
+        Split and return the indices, mus and nus
+        in the corresponding order.
+        """
+        items = sorted(list(self._selector.items()), key=lambda a: a[0])
+        items = list(zip(*items))
+        indices = items[0]
+        values = list(zip(*items[1]))
+        mus, nus = values[0], values[1]
+        pis = tuple([self._range - m - n for m,n in items[1]])
+        return indices, mus, nus, pis
 
     def length(self):
         return self._universe.length()
