@@ -140,26 +140,76 @@ def plot_bar_intValued(ifs):
     # plt.show()
     
 # -----------------------------------------------------------------#
+#        Triangular Representation
+# -----------------------------------------------------------------#
+
+def plot_triangle(ifs, ax, color='k', linewidth=1.5):
+    min = 0.0
+    max = ifs.get_range() - 1
+
+    x_triang = [min, min, max, min]
+    y_triang = [min, max, min, min]
+    ax.set_xlim([min-(max-min)/30.0, max+(max-min)/30.0])
+    ax.set_ylim([min-(max-min)/30.0, max+(max-min)/30.0])
+    ax.set_xticks(np.arange(min, max+1, 1))
+    ax.set_yticks(np.arange(min, max+1, 1))
+    
+    ax.plot(x_triang, y_triang, linewidth=linewidth, color=color)
+    ax.set_xlabel('Membership')
+    ax.set_xlabel('Non-membership')
+
 
 def plot_triangular(ifs):
     fig = plt.figure()
     ax0 = plt.subplot2grid((1,1), (0,0))
-    
+    plot_triangle(ifs, ax0, 'k')
     indices, mus, nus, pis = ifs.elements_split()
-
-    min = 0.0
-    max = ifs.get_range()
-
-    x_triang = [min, min, max, min]
-    y_triang = [min, max, min, min]
-    ax0.set_xlim([min-(max-min)/30.0, max+(max-min)/30.0])
-    ax0.set_ylim([min-(max-min)/30.0, max+(max-min)/30.0])
-    ax0.set_xticks(np.arange(min, max+1, 1))
-    ax0.set_yticks(np.arange(min, max+1, 1))
-    
-    ax0.plot(x_triang, y_triang, linewidth=1.5, color='k')
     ax0.scatter(mus, nus, color='r')    
     
+def plot_triangular_with_arrows(ifs):
+    fig = plt.figure()
+    ax0 = plt.subplot2grid((1,1), (0,0))
+    
+    plot_triangle(ifs, ax0)
+    
+    indices, mus, nus, pis = ifs.elements_split()
+    mus = np.array(mus, dtype='float32')
+    nus = np.array(nus, dtype='float32')
+ 
+    ax0.scatter(mus, nus, color='r') 
+    ax0.plot(mus, nus, color='c')    
+    
+    musD = mus[1:] - mus[:-1]
+    nusD = nus[1:] - nus[:-1]  
+    Diff = np.sqrt(musD**2 + nusD**2)
+    Diff = np.array(list(map(lambda a: np.nan if a==0 else a, Diff)),
+                    dtype='float32')
+    Cos = musD/Diff
+    Sin = nusD/Diff  
+    
+    muS= mus[:-1] + (mus[1:] - mus[:-1])/2.0
+    nuS= nus[:-1] + (nus[1:] - nus[:-1])/2.0
+    # ax0.scatter(muS, nuS, color='g')    
+    
+    print(muS)
+    print(nuS)
+    head_width = 0.2*ifs.get_range()/30
+    head_length = 0.5*ifs.get_range()/30
+    for mu,c,nu,s  in zip(muS,Cos, nuS,Sin):
+        delta = 0.001 # if direction >= 0 else -0.0001
+        if(s is not np.nan):
+            print(mu, nu, mu+c*delta, nu+s*delta)
+            ax0.arrow(mu, nu, c*delta, s*delta,
+                 head_width=head_width, head_length=head_length,
+                 color='k')
+
+   
+    plt.title("Plot triangular with arrows")
+
+
+def plot_3D_histogramm(ifs):
+    pass
+
 #     mus_plus_pis = [m+p for m,p in zip(mus,pis)]
 #     ax0.plot(indices, mus, 'bo', linewidth=2,
 #             label='Membership')
