@@ -1,7 +1,7 @@
+import numpy as np
+
 import matplotlib.pyplot as plt
 from matplotlib import style
-
-import numpy as np
 
 style.use('ggplot')
 
@@ -143,26 +143,27 @@ def plot_bar_intValued(ifs):
 #        Triangular Representation
 # -----------------------------------------------------------------#
 
-def plot_triangle(ifs, ax, color='k', linewidth=1.5):
-    min = 0.0
-    max = ifs.get_range() - 1
+def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
+    min_ = 0.0
+    max_ = rang - 1
 
-    x_triang = [min, min, max, min]
-    y_triang = [min, max, min, min]
-    ax.set_xlim([min-(max-min)/30.0, max+(max-min)/30.0])
-    ax.set_ylim([min-(max-min)/30.0, max+(max-min)/30.0])
-    ax.set_xticks(np.arange(min, max+1, 1))
-    ax.set_yticks(np.arange(min, max+1, 1))
+    x_triang = [min_, min_, max_, min_]
+    y_triang = [min_, max_, min_, min_]
+    ax.set_xlim([min_-(max_-min_)/30.0, max_ + (max_-min_)/30.0])
+    ax.set_ylim([min_-(max_-min_)/30.0, max_ + (max_-min_)/30.0])
+    ax.set_xticks(np.arange(min_, max_+1, 1))
+    ax.set_yticks(np.arange(min_, max_+1, 1))
     
-    ax.plot(x_triang, y_triang, linewidth=linewidth, color=color)
+    ax.plot(x_triang, y_triang, plottyp, linewidth=linewidth, color=color)
     ax.set_xlabel('Membership')
-    ax.set_xlabel('Non-membership')
+    ax.set_ylabel('Non-membership')
+
 
 
 def plot_triangular(ifs):
     fig = plt.figure()
     ax0 = plt.subplot2grid((1,1), (0,0))
-    plot_triangle(ifs, ax0, 'k')
+    plot_triangle(ifs.get_range(), ax0, 'k')
     indices, mus, nus, pis = ifs.elements_split()
     ax0.scatter(mus, nus, color='r')    
     
@@ -170,7 +171,7 @@ def plot_triangular_with_arrows(ifs):
     fig = plt.figure()
     ax0 = plt.subplot2grid((1,1), (0,0))
     
-    plot_triangle(ifs, ax0)
+    plot_triangle(ifs.get_range(), ax0)
     
     indices, mus, nus, pis = ifs.elements_split()
     mus = np.array(mus, dtype='float32')
@@ -190,15 +191,12 @@ def plot_triangular_with_arrows(ifs):
     muS= mus[:-1] + (mus[1:] - mus[:-1])/2.0
     nuS= nus[:-1] + (nus[1:] - nus[:-1])/2.0
     # ax0.scatter(muS, nuS, color='g')    
-    
-    print(muS)
-    print(nuS)
     head_width = 0.2*ifs.get_range()/30
     head_length = 0.5*ifs.get_range()/30
     for mu,c,nu,s  in zip(muS,Cos, nuS,Sin):
         delta = 0.001 # if direction >= 0 else -0.0001
         if(s is not np.nan):
-            print(mu, nu, mu+c*delta, nu+s*delta)
+#             print(mu, nu, mu+c*delta, nu+s*delta)
             ax0.arrow(mu, nu, c*delta, s*delta,
                  head_width=head_width, head_length=head_length,
                  color='k')
@@ -207,23 +205,82 @@ def plot_triangular_with_arrows(ifs):
     plt.title("Plot triangular with arrows")
 
 
-def plot_3D_histogramm(ifs):
-    pass
+def plot_3D_histogramm(ifs, bins=None):
 
-#     mus_plus_pis = [m+p for m,p in zip(mus,pis)]
-#     ax0.plot(indices, mus, 'bo', linewidth=2,
-#             label='Membership')
-#     ax0.plot(indices, nus, 'go', linewidth=2,
-#             label='Non-membership')
-# 
-#     ax0.fill_between(indices, 0, mus, facecolor='b', alpha=0.3)
-#     ax0.fill_between(indices, 0, nus, facecolor='g', alpha=0.3)   
-# #              mus_plus_pis, [ifs._range]*ifs.length(), 'g')
-# 
-#     ax0.set_xlabel('Universe')
-#     ax0.set_ylabel('Degrees')    
-#     plt.legend(loc='upper right')
-#     plt.title('Intuitionistic plot type')
+    '''
+    Demo of a histogram for 2 dimensional data as a bar graph in 3D.
+    '''
+    bins = ifs.get_range()-1 if (bins is None) else bins 
+    
+    from mpl_toolkits.mplot3d import Axes3D
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    plot_triangle(ifs.get_range(), ax, plottyp='--')
+    
+    indices, mus, nus, pis = ifs.elements_split()
+    print(ifs.get_range())
+    rang = ifs.get_range()
+#     bins = 4 #rang-1
+    hist, mEdges, nEdges = np.histogram2d(mus,nus, bins=bins,
+                                          range=[[0,rang-1],[0,rang-1]])
+    lhist = len(hist)
+    for i in range(lhist):
+        hist[i,lhist-1-i] *= 2
+    
+    print(hist)
+    print(mEdges)
+    print(nEdges)
+    
+    mEdgesMid= mEdges[:-1] + (mEdges[1:] - mEdges[:-1])*0.375
+    nEdgesMid= nEdges[:-1] + (nEdges[1:] - nEdges[:-1])*0.375
+#     mEdgesMid[-1] = mEdges[-2] + (mEdges[-1] - mEdges[-2])*0.25
+#     nEdgesMid[-1] = nEdges[-2] + (nEdges[-1] - nEdges[-2])*0.25
+    print('mEdgesMid')
+    print(mEdgesMid)
+    print(nEdgesMid)
+
+    muPos = np.zeros(bins*(bins+1)//2,dtype='float32')
+    nuPos = np.zeros_like(muPos)
+    dz = np.zeros_like(muPos)
+    
+    S = lambda k: k*(k+1)//2 # = 1+2+...+k
+    l = len(mEdgesMid)
+    for i, pos in enumerate(mEdgesMid):
+        start = S(l)-S(l-i)     # = l+(l-1)+...+(l-i+1)
+        end   = S(l)-S(l-(i+1)) # = l+(l-1)+...+(l-i+1)+(l-i)
+        dz[start:end]  = hist[i,:l-i]
+        muPos[start:end] = pos
+        nuPos[start:end] = nEdgesMid[:l-i]
+        # The diagonal bins are triangular (half), fix them
+#         muPos[end-1] = mEdges[i] + (mEdges[i+1] - mEdges[i])*0.25
+#         nuPos[end-1] = nEdges[l-i-1] + (mEdges[l-i] - mEdges[l-i-1])*0.25
+        
+        
+#     print('test...')
+#     print(muPos)
+#     print(nuPos)
+    print(dz)
+
+    dmu = (mEdges[1] - mEdges[0])*0.25 * np.ones_like(muPos)
+    dnu = (nEdges[1] - nEdges[0])*0.25 * np.ones_like(nuPos)
+    
+    for i, _ in enumerate(mEdgesMid):
+        diag_pos = S(l)-S(l-(i+1))
+        dmu[diag_pos-1] = (mEdges[i+1] - mEdges[i])*0.125  
+        dnu[diag_pos-1] = (mEdges[l-i] - mEdges[l-i-1])*0.125  
+
+
+    ax.bar3d(muPos, nuPos, np.zeros_like(muPos),
+             dmu,
+             dnu, 
+#              (mEdges[1] - mEdges[0])*0.25,  
+#              (nEdges[1] - nEdges[0])*0.25, 
+             dz, 
+             color='b', alpha=0.3)
+#            zsort='average')
+
 
 
 

@@ -1,4 +1,4 @@
-#import numpy as np
+import numpy as np
 import copy
 import random
 from ifs_lattice import *
@@ -26,15 +26,16 @@ class IFS(object):
         return result
 
     @classmethod
-    def random(cls, universe, rang):
-        random.seed(a=1, version=2)
+    def random(cls, universe, rang, randseed=1):
+        np.random.seed(randseed)
+        #np.random.seed(a=randseed, version=2)
         result = cls(universe, rang)
-        range_ = range(rang)
         result._selector = {}
 
-        for idx in result._universe.indices():
-            sample = random.sample(range_, 2)
-            result._selector[idx] = (min(sample), rang - max(sample))
+        sample = np.random.random((result._universe.length(), 2)) *\
+                 (rang-1)
+        for idx, (a,b) in enumerate(sample):            
+            result._selector[idx] = (min(a,b), rang-1 - max(a,b))
 
         return result
 
