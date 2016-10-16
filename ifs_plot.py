@@ -144,6 +144,10 @@ def plot_bar_intValued(ifs):
 # -----------------------------------------------------------------#
 
 def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
+    '''
+    Plot the main triangle as font of the triangular
+    representation of IFSs
+    '''
     min_ = 0.0
     max_ = rang - 1
 
@@ -159,13 +163,13 @@ def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
     ax.set_ylabel('Non-membership')
 
 
-
 def plot_triangular(ifs):
     fig = plt.figure()
     ax0 = plt.subplot2grid((1,1), (0,0))
     plot_triangle(ifs.get_range(), ax0, 'k')
     indices, mus, nus, pis = ifs.elements_split()
     ax0.scatter(mus, nus, color='r')    
+
     
 def plot_triangular_with_arrows(ifs):
     fig = plt.figure()
@@ -208,12 +212,13 @@ def plot_triangular_with_arrows(ifs):
 def plot_3D_histogramm(ifs, bins=None):
 
     '''
-    Demo of a histogram for 2 dimensional data as a bar graph in 3D.
+    Plot a 3D histogram in the triangular representation
+    of an IFS.
     '''
-    bins = ifs.get_range()-1 if (bins is None) else bins 
-    
     from mpl_toolkits.mplot3d import Axes3D
     
+    bins = ifs.get_range()-1 if (bins is None) else bins 
+   
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
@@ -222,24 +227,15 @@ def plot_3D_histogramm(ifs, bins=None):
     indices, mus, nus, pis = ifs.elements_split()
     print(ifs.get_range())
     rang = ifs.get_range()
-#     bins = 4 #rang-1
-    hist, mEdges, nEdges = np.histogram2d(mus,nus, bins=bins,
+
+    hist2d, mEdges, nEdges = np.histogram2d(mus,nus, bins=bins,
                                           range=[[0,rang-1],[0,rang-1]])
-    lhist = len(hist)
+    lhist = len(hist2d)
     for i in range(lhist):
-        hist[i,lhist-1-i] *= 2
-    
-    print(hist)
-    print(mEdges)
-    print(nEdges)
+        hist2d[i,lhist-1-i] *= 2
     
     mEdgesMid= mEdges[:-1] + (mEdges[1:] - mEdges[:-1])*0.375
     nEdgesMid= nEdges[:-1] + (nEdges[1:] - nEdges[:-1])*0.375
-#     mEdgesMid[-1] = mEdges[-2] + (mEdges[-1] - mEdges[-2])*0.25
-#     nEdgesMid[-1] = nEdges[-2] + (nEdges[-1] - nEdges[-2])*0.25
-    print('mEdgesMid')
-    print(mEdgesMid)
-    print(nEdgesMid)
 
     muPos = np.zeros(bins*(bins+1)//2,dtype='float32')
     nuPos = np.zeros_like(muPos)
@@ -250,18 +246,12 @@ def plot_3D_histogramm(ifs, bins=None):
     for i, pos in enumerate(mEdgesMid):
         start = S(l)-S(l-i)     # = l+(l-1)+...+(l-i+1)
         end   = S(l)-S(l-(i+1)) # = l+(l-1)+...+(l-i+1)+(l-i)
-        dz[start:end]  = hist[i,:l-i]
+        dz[start:end]  = hist2d[i,:l-i]
         muPos[start:end] = pos
         nuPos[start:end] = nEdgesMid[:l-i]
         # The diagonal bins are triangular (half), fix them
 #         muPos[end-1] = mEdges[i] + (mEdges[i+1] - mEdges[i])*0.25
 #         nuPos[end-1] = nEdges[l-i-1] + (mEdges[l-i] - mEdges[l-i-1])*0.25
-        
-        
-#     print('test...')
-#     print(muPos)
-#     print(nuPos)
-    print(dz)
 
     dmu = (mEdges[1] - mEdges[0])*0.25 * np.ones_like(muPos)
     dnu = (nEdges[1] - nEdges[0])*0.25 * np.ones_like(nuPos)
@@ -271,12 +261,9 @@ def plot_3D_histogramm(ifs, bins=None):
         dmu[diag_pos-1] = (mEdges[i+1] - mEdges[i])*0.125  
         dnu[diag_pos-1] = (mEdges[l-i] - mEdges[l-i-1])*0.125  
 
-
     ax.bar3d(muPos, nuPos, np.zeros_like(muPos),
              dmu,
              dnu, 
-#              (mEdges[1] - mEdges[0])*0.25,  
-#              (nEdges[1] - nEdges[0])*0.25, 
              dz, 
              color='b', alpha=0.3)
 #            zsort='average')
