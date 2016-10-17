@@ -19,11 +19,16 @@ def main():
     plot_bar_Intuitionistic(ifs01)
     plot_together_intValued(ifs01)
     plot_together_Intuitionistic(ifs01)
-    plot_triangular(ifs01)
+#     plot_triangular(ifs01)
 
     plot_triangular_with_arrows(ifs01)
     
-    plot_3D_histogramm(ifs01, bins=None)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+ 
+    plot_membership_3Dhistogram(ifs01,ax, bins=10, typs=['mu','nu'])
+    
+    plot_3D_histogramm(ifs01, bins=10)
     plt.show()
     a = 10
     # args = parse_arguments()

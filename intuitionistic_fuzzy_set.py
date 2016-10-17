@@ -33,9 +33,9 @@ class IFS(object):
         result._selector = {}
 
         sample = np.random.random((result._universe.length(), 2)) *\
-                 (rang-1)
+                 (rang)
         for idx, (a,b) in enumerate(sample):            
-            result._selector[idx] = (min(a,b), rang-1 - max(a,b))
+            result._selector[idx] = (min(a,b), rang - max(a,b))
 
         return result
 
