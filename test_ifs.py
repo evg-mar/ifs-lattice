@@ -5,6 +5,7 @@ import sys
 
 from intuitionistic_fuzzy_set import *
 from ifs_plot import *
+from ifs_3Dplot import *
   
 
 def main():
@@ -26,9 +27,9 @@ def main():
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
  
-    plot_membership_3Dhistogram(ifs01,ax, bins=10, typs=['mu','nu'])
+    plot_membership_3Dhistogram(ifs01,ax, bins=15, typs=['mu','nu'])
     
-    plot_3D_histogramm(ifs01, bins=10)
+    plot_3D_histogramm(ifs01, bins=15)
     plt.show()
     a = 10
     # args = parse_arguments()
