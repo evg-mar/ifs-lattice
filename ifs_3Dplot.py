@@ -4,6 +4,7 @@
 from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib.pyplot as plt
+from matplotlib import lines
 from matplotlib import style
 style.use('ggplot')
 
@@ -11,6 +12,20 @@ import numpy as np
 
 from ifs_plot import plot_triangle
 
+
+
+def rotate_axislabels(ax, angles={'x': 45,'y': 45,'z': 45}):
+    if 'x' in angles:
+        for label in ax.xaxis.get_ticklabels():
+            label.set_rotation(angles['x'])
+    if 'y' in angles:
+        for label in ax.yaxis.get_ticklabels():
+            label.set_rotation(angles['y'])
+    if 'z' in angles:
+        for label in ax.zaxis.get_ticklabels():
+            label.set_rotation(angles['z'])
+
+    
 
 def plot_grid_triangular(ax, rang, muEdges=None, nuEdges=None, 
                         colors={'mu':'b', 'nu':'g'}):
@@ -33,7 +48,7 @@ def plot_membership_3Dhistogram(ifs,
                                 ax, 
                                 bins=None, 
                                 typs=['mu','nu'],
-                                colors={'mu':'b', 'nu':'g'},
+                                colors={'mu':'b', 'nu':'g', 'elem':'r'},
                                 alpha=0.3):
     
     bins = ifs.get_range()  if (bins is None) else bins 
@@ -44,7 +59,7 @@ def plot_membership_3Dhistogram(ifs,
     plot_triangle(rang, ax, plottyp='--', color='k')
     # Plot scatter
     ax.scatter(mus, nus, np.zeros(len(mus),dtype='float32'),
-               color='r')
+               color=colors['elem'])
     #//Plot scatter
 
     hist2d, muEdges, nuEdges = np.histogram2d(mus,nus, bins=bins,
@@ -97,30 +112,50 @@ def plot_membership_3Dhistogram(ifs,
     plot_membership('mu')
     plot_membership('nu')
     zLimit = plot_membership.zLimit
+    ############
+    ax.set_xlabel('Membership', labelpad=20)
+    ax.set_xlim3d(-d, rang+d)
+    ax.set_xticks(muEdges, minor=False)
+    ax.tick_params(axis='x', colors=colors['mu'])
+    
+    ax.set_ylabel('Non-membership', labelpad=20)
+    ax.set_ylim3d(-d, rang+d)
+    ax.set_yticks(nuEdges, minor=False)
+    ax.tick_params(axis='y', colors=colors['nu'])    
 
-    ax.set_xlabel('Membership')
-    ax.set_xlim3d(-0.5, rang+0.5)
-    ax.set_ylabel('Non-membership')
-    ax.set_ylim3d(-0.5, rang+0.5)
-    ax.set_zlabel('Number of occurences')
+    rotate_axislabels(ax, angles={'x':-45,'y':45})
+
+    ax.set_zlabel('Number of occurences per area (square)', labelpad=20)
+    ###########
     ax.set_zlim3d(0, zLimit + 0.5)
+      
+    #Add a legend in 3D
+    elemMapsLabel = lines.Line2D([0],[0], linestyle="none",
+                               c=colors['elem'], marker = 'o')    
+    muHistBars = plt.Rectangle((0, 0), 1, 1, fc=colors['mu'])
+    nuHistBars = plt.Rectangle((0, 0), 1, 1, fc=colors['nu'])
+      
+    ax.legend([muHistBars, nuHistBars, elemMapsLabel],
+              ['Membership histogram bins', 
+               'Non-membership histogram bins', 
+               'Map of the elements from the Universe'],
+              numpoints = 2)
+
 
 
 def plot_3D_histogramm(ifs,
                        bins=None,
-                       colors={'mu':'b','nu':'g'}):
-
+                       colors={'mu':'b','nu':'g','hist':'y','elem':'r'}):
     '''
     Plot a 3D histogram in the triangular representation
     of an IFS.
     '''
-    
+        
     bins = ifs.get_range()  if (bins is None) else bins 
    
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    
-    
+    ax = fig.add_subplot(111, projection='3d')    
+
     indices, mus, nus, pis = ifs.elements_split()
     # print(ifs.get_range())
     rang = ifs.get_range()
@@ -128,7 +163,7 @@ def plot_3D_histogramm(ifs,
     plot_triangle(rang, ax, plottyp='--', color='k')
     # Plot scatter
     ax.scatter(mus, nus, np.zeros(len(mus),dtype='float32'),
-               color='r')
+               color=colors['elem'])
     #//Plot scatter
 
     hist2d, mEdges, nEdges = np.histogram2d(mus,nus, bins=bins,
@@ -173,14 +208,40 @@ def plot_3D_histogramm(ifs,
              dmu,
              dnu, 
              dz, 
-             color='y', alpha=0.3)
+             color=colors['hist'], alpha=0.3)
 # #            zsort='average')
 
-    ax.set_xlabel('Membership')
-    ax.set_xlim3d(-0.5, rang+0.5)
-    ax.set_ylabel('Non-membership')
-    ax.set_ylim3d(-0.5, rang+0.5)
-    ax.set_zlabel('Number of occurences per area (square)')
+    d = rang/bins  # the length of a bin (area = length(bin)**2)
+    
+    ax.set_xlabel('Membership', labelpad=20)
+    ax.set_xlim3d(-d, rang+d)
+    ax.set_xticks(mEdges, minor=False)
+    ax.tick_params(axis='x', colors=colors['mu'])
+    
+    ax.set_ylabel('Non-membership', labelpad=20)
+    ax.set_ylim3d(-d, rang+d)
+    ax.set_yticks(nEdges, minor=False)
+    ax.tick_params(axis='y', colors=colors['nu'])    
+
+    rotate_axislabels(ax, angles={'x':-45,'y':45})
+
+    ax.set_zlabel('Number of occurences per area (square)', labelpad=20)
     ax.set_zlim3d(0, max(dz) + 0.5)
-
-
+    
+    #Add a legend in 3D
+    muBinsLabel = lines.Line2D([0],[0], linestyle="none",
+                               c=colors['mu'], marker = 0)
+    nuBinsLabel = lines.Line2D([0],[0], linestyle="none",
+                               c=colors['nu'], marker = 0)
+    elemMapsLabel = lines.Line2D([0],[0], linestyle="none",
+                               c=colors['elem'], marker = 'o')
+    histBars = plt.Rectangle((0, 0), 1, 1, fc=colors['hist'])
+    
+    
+    
+    ax.legend([muBinsLabel, nuBinsLabel, histBars, elemMapsLabel],
+              ['Membership degree bins', 
+               'Non-membership degree bins', 
+               "Histogram bars",
+               "Map of the elements from the Universe"],
+              numpoints = 2)
