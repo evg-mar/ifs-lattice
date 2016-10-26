@@ -4,8 +4,8 @@ import abc
 class TriangPoset(object):
     __metaclass__  = abc.ABCMeta
 
-    def __init__(self, posetpool):
-        self.posetpool = posetpool
+#     def __init__(self, posetpool):
+#         self.posetpool = posetpool
 
     @abc.abstractmethod
     def eq(self, first, second):
@@ -29,9 +29,9 @@ class TriangPoset(object):
     def inf(self, *args):
         return
 
-    @abc.abstractmethod
-    def is_correct(self, *args):
-        return
+#     @abc.abstractmethod
+#     def is_correct(self, *args):
+#         return
 
     def neq(self, first, second):
         return not self.eq(first, second)
@@ -45,6 +45,10 @@ class TriangPoset(object):
     def gt(self, first, second):
         return self.lt(second, first)
 
+    def is_correct(self, mu, nu):
+#         mu, nu = elem[0], elem[1]
+        return (mu >= 0 and nu >= 0 and 0 <= mu + nu <= 1)
+
 
 class StdTriangPoset(TriangPoset):
 
@@ -54,10 +58,6 @@ class StdTriangPoset(TriangPoset):
     def leq(self, a, b):
         return a[0] <= b[0] and a[1] >= b[1]
 
-    def is_correct(self, *elem):
-        mu, nu = elem[0], elem[1]
-        return (mu >= 0 and nu >= 0 and 0 <= mu + nu and mu + nu <= 1)
-
     def sup(self, *args):
 #         if not self.is_correct(a):
 #             raise AssertionError("First argument is not correct!")
@@ -65,7 +65,7 @@ class StdTriangPoset(TriangPoset):
 #             raise AssertionError("Second argument is not correct!")
 
         mu = max([arg[0] for arg in args])
-        nu = max([arg[1] for arg in args])
+        nu = min([arg[1] for arg in args])
 
         return mu,nu
 
@@ -88,10 +88,6 @@ class PiTriangPoset(TriangPoset):
     def leq(self, a, b):
         return a[0] <= b[0] and a[1] <= b[1]
 
-    def is_correct(self, elem):
-        mu, nu = elem[0], elem[1]
-        return (mu >= 0 and nu >= 0 and 0 <= mu + nu <= 1)
-
     def sup(self, *args):
 #         if not self.is_correct(a):
 #             raise AssertionError("First argument is not correct!")
@@ -100,7 +96,7 @@ class PiTriangPoset(TriangPoset):
         mu = max([arg[0] for arg in args])
         nu = max([arg[1] for arg in args])
         
-        return mu,nu if self.is_correct(mu, nu) else None
+        return (mu,nu) if self.is_correct(mu, nu) else None
 
     def inf(self, *args):
 #         if not self.is_correct(a):
@@ -110,4 +106,4 @@ class PiTriangPoset(TriangPoset):
         mu = min([arg[0] for arg in args])
         nu = min([arg[1] for arg in args])
 
-        return mu,nu if self.is_correct(mu, nu) else None
+        return mu,nu # if self.is_correct(mu, nu) else None

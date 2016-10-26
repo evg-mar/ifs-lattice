@@ -10,7 +10,7 @@ style.use('ggplot')
 
 import numpy as np
 
-from ifs_plot import plot_triangle
+from ifs_2Dplot import plot_triangle
 
 
 

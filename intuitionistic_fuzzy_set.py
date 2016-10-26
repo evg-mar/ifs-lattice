@@ -1,8 +1,8 @@
 import numpy as np
 import copy
-import random
-from ifs_lattice import *
-from universal_set import *
+# import random
+# from ifs_lattice import *
+# from universal_set import *
 
 
 STD_ZERO = (0, 1)
@@ -38,6 +38,17 @@ class IFS(object):
             result._selector[idx] = (min(a,b), rang - max(a,b))
 
         return result
+    
+    @property
+    def neg(self):
+        result = IFS.from_IFS(self)
+        result._selector = { }
+        result._selector = {i: (nu,mu) 
+                                    for i, (mu,nu) in self._selector.items()
+                                    if (nu,mu) != STD_ZERO}
+        indices = set(self.indices()) - set(self._selector.keys())
+        result._selector.update({i:STD_ONE for i in indices})
+        return result
 
     def __getitem__(self, key):
 
@@ -52,6 +63,11 @@ class IFS(object):
             self._selector[key] = value
         else:
             raise KeyError("%i is not a valide index" % key)
+
+    def __str__(self):
+        result = ("Ifs id: %d, Range: %d \n"% (id(self),self._range,))
+        result += str(self._selector)
+        return result  
 
     def get(self, idx, default=None):
         return self._selector.get(idx, default)
@@ -69,8 +85,12 @@ class IFS(object):
         supp_idxes = [i for i, v in self._selector.items()
                                         if v != STD_ZERO
                      ]
-
         return set(supp_idxes)
+
+    def enumerate_support_indeces(self):
+        for i, v in self._selector.items():
+            if v != STD_ZERO:
+                yield (i,v)
 
     def elements_split(self):
         """
