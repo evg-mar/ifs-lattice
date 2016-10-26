@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -59,6 +60,7 @@ def plot_together_intValued(ifs):
     plt.grid(True)
     plt.legend(loc='upper right')
     plt.title('Interval Valued plot type')
+
 
 def plot_together_Intuitionistic(ifs):
 
@@ -158,6 +160,33 @@ def plot_bar_intValued(ifs):
 #        Triangular Representation
 # -----------------------------------------------------------------#
 
+class PlotTriangular2D(object):
+    
+    def __init__(self, 
+                mus, nus,
+                rang=1,                 
+                axtype={'triang':True, 'mu_histo':False, 'nu_histo':False},
+                bins={'mu':10, 'nu':10},
+                colors={'mu':'b', 'nu':'g', 'elem':'r'}):
+        self.mus = mus
+        self.nus = nus
+        self.rang = rang
+        self.axtype = copy.deepcopy(axtype)
+        self.bins = copy.deepcopy(bins)
+        self.colors = copy.deepcopy(colors)
+        
+        
+    def set_musnus(self, mus, nus):
+        assert(len(mus) == len(nus))
+        self.mus = mus
+        self.nus = nus
+
+    def set_rang(self, rang):
+        assert(rang > 0)
+
+    def set_axestype(self, axtype):
+        self.axtype = copy.deepcopy(axtype)
+
 def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
     '''
     Plot the main triangle as font of the triangular
@@ -174,11 +203,84 @@ def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
 #     ax.set_yticks(np.arange(min_, max_+1, 1))
     
     ax.plot(x_triang, y_triang, plottyp, linewidth=linewidth, color=color)
-    ax.set_xlabel('Membership')
-    ax.set_ylabel('Non-membership')
 
 
-def plot_triangular(ifs,
+def plot_triangular_(ax,
+                    mus,nus, rang=1,
+                    bins={'mu':10, 'nu':10},
+                    colors={'mu':'b', 'nu':'g', 'elem':'r'}):
+    assert(type(bins) in [int, dict])
+    if type(bins) == int:
+        bins = {'mu':bins, 'nu':bins}
+
+    axScatter = ax
+#     axNuHist = plt.subplot2grid((4,4), (1,3), rowspan=3, colspan=1,
+#                                 sharey=axScatter)
+#     axMuHist = plt.subplot2grid((4,4), (0,0), rowspan=1, colspan=3,
+#                                 sharex=axScatter)
+
+    # Set ticks to the scatter axes
+    xlinspace = np.linspace(0.0, rang, bins['mu']+1)
+    axScatter.set_xticks(xlinspace)
+    ylinspace = np.linspace(0.0, rang, bins['nu']+1)
+    axScatter.set_yticks(ylinspace)
+    #//
+    # Set invisible the ticks of the histogram axes
+#     plt.setp(axMuHist.get_xticklabels(), visible=False)
+#     plt.setp(axNuHist.get_yticklabels(), visible=False)
+    #//
+
+    plot_triangle(rang, axScatter, 'k')
+    
+    line2d_, = axScatter.plot(mus, nus, 
+                              marker='o', markerfacecolor=colors['elem'],
+                              linestyle=' ', color='b')
+
+    rotate_axislabels(axScatter, {'x':45,'y':45})
+
+#     histMuValues, _, _ = axMuHist.hist(mus, bins=xlinspace, color=colors['mu'])
+#     histNuValues, _, _ = axNuHist.hist(nus, bins=ylinspace, color=colors['nu'],
+#                                        orientation='horizontal')
+
+    # Set limits to the histogram axes
+#     histLimit = max(max(histMuValues), max(histNuValues))
+#     axMuHist.set_ylim(0.0, histLimit)
+#     axNuHist.set_xlim(0.0, histLimit)
+    # //Set limits to the histogram axes
+
+    axScatter.grid(True, linestyle='--', color='r')
+    for lin in axScatter.get_xgridlines():
+        lin.set_color(colors['mu'])
+    for lin in axScatter.get_ygridlines():
+        lin.set_color(colors['nu'])
+
+    # Plot legend of the figure /for all subplots/
+#     axLegend = plt.subplot2grid((4,4), (0,3), rowspan=1, colspan=1)
+    # Hide font and ticks of the legend axes
+#     axLegend.patch.set_visible(False)
+#     axLegend.set_axis_off()
+#     plt.setp(axLegend.get_xticklabels(), visible=False)
+#     plt.setp(axLegend.get_yticklabels(), visible=False)
+#     
+#     histMuBars = plt.Rectangle((0, 0), 1, 1, fc=colors['mu'])
+#     histNuBars = plt.Rectangle((0, 0), 1, 1, fc=colors['nu'])
+# 
+#     axLegend.legend((legendSc, histMuBars, histNuBars ),
+#                     ("Map of the Universe",
+#                      "Membership histogram",
+#                      "Non-membership histogram"),
+# #                     fontsize='large',
+#                     loc='upper right')
+
+    axScatter.legend((line2d_,), ("Map of the Universe",),
+                     loc='upper right', fontsize='large')
+    axScatter.set_xlabel('Membership', fontsize='x-large')
+    axScatter.set_ylabel('Non-membership', fontsize='x-large')
+    
+    return axScatter, line2d_
+
+
+def plot_triangular(mus,nus, rang=1,
                     bins={'mu':10, 'nu':10},
                     colors={'mu':'b', 'nu':'g', 'elem':'r'}):
     assert(type(bins) in [int, dict])
@@ -187,8 +289,6 @@ def plot_triangular(ifs,
 
     fig = plt.figure()
     plt.subplots_adjust(hspace=0.1, wspace=0.1)
-    
-    rang = ifs.get_range()
     
     axScatter = plt.subplot2grid((4,4), (1,0), rowspan=3, colspan=3)
     
@@ -208,11 +308,11 @@ def plot_triangular(ifs,
     plt.setp(axNuHist.get_yticklabels(), visible=False)
     #//
 
-    plot_triangle(ifs.get_range(), axScatter, 'k')
-
-    indices, mus, nus, pis = ifs.elements_split()
+    plot_triangle(rang, axScatter, 'k')
     
-    legendSc = axScatter.scatter(mus, nus, color=colors['elem'])
+    legendSc = axScatter.plot(mus, nus, 
+                              marker='o', markerfacecolor=colors['elem'],
+                              linestyle=' ', color='b')
     axScatter.legend(loc='upper right')
     rotate_axislabels(axScatter, {'x':45,'y':45})
 
@@ -236,6 +336,7 @@ def plot_triangular(ifs,
     axLegend = plt.subplot2grid((4,4), (0,3), rowspan=1, colspan=1)
     # Hide font and ticks of the legend axes
     axLegend.patch.set_visible(False)
+    axLegend.set_axis_off()
     plt.setp(axLegend.get_xticklabels(), visible=False)
     plt.setp(axLegend.get_yticklabels(), visible=False)
     
@@ -245,68 +346,12 @@ def plot_triangular(ifs,
     axLegend.legend((legendSc, histMuBars, histNuBars ),
                     ("Map of the Universe",
                      "Membership histogram",
-                     "Non-membership histogram"), loc='upper right')
+                     "Non-membership histogram"),
+#                     fontsize='large',
+                    loc='upper right')
 
-
-
-def plot_triangular_(ifs,
-                    bins={'mu':10, 'nu':10},
-                    colors={'mu':'b', 'nu':'g', 'elem':'r'}):
-    assert(type(bins) in [int, dict])
-    if type(bins) == int:
-        bins = {'mu':bins, 'nu':bins}
-
-    fig = plt.figure()
-    plt.subplots_adjust(hspace=0.1, wspace=0.1)
-    
-    rang = ifs.get_range()
-    
-    axScatter = plt.subplot2grid((4,4), (1,0), rowspan=3, colspan=3)
-    xlinspace = np.linspace(0.0, rang, bins['mu']+1)
-    axScatter.set_xticks(xlinspace)
-    ylinspace = np.linspace(0.0, rang, bins['nu']+1)
-    axScatter.set_yticks(ylinspace)
-    
-    axNuHist = plt.subplot2grid((4,4), (1,3), rowspan=3, colspan=1,
-                                sharey=axScatter)
-    axMuHist = plt.subplot2grid((4,4), (0,0), rowspan=1, colspan=3,
-                                sharex=axScatter)
-
-# #     axScatter.get_ygridlines(color=colors['nu'])
-# #     plt.setp(axScatter.get_xticklabels(), visible=True)
-#     plt.setp(axMuHist.get_xticklabels(), visible=False)
-#     plt.setp(axNuHist.get_yticklabels(), visible=False)
-# 
-#     plot_triangle(ifs.get_range(), axScatter, 'k')
-# 
-    indices, mus, nus, pis = ifs.elements_split()
-# 
-# #     axScatter.set_axis_bgcolor('y')
-# 
-#     histMuValues, _, _ = axMuHist.hist(mus, bins=xlinspace, color=colors['mu'])
-#     histNuValues, _, _ = axNuHist.hist(nus, bins=ylinspace, color=colors['nu'],
-#                   orientation='horizontal')
-#     histLimit = max(max(histMuValues), max(histNuValues))
-#     # Set limits to the histogram axes
-#     axMuHist.set_ylim(0.0, histLimit)
-#     axNuHist.set_xlim(0.0, histLimit)
-# 
-    axScatter.scatter(mus, nus, color=colors['elem'], label='Etoo')
-    axScatter.legend(loc='upper left')
-#     
-#     axScatter.grid(True, linestyle='--', color='r')
-#     for lin in axScatter.get_xgridlines():
-#         lin.set_color(colors['mu'])
-#     for lin in axScatter.get_ygridlines():
-#         lin.set_color(colors['nu'])
-# 
-# #    axScatter.legend()
-#     
-#     rotate_axislabels(axScatter, {'x':45,'y':45})
-# #     rotate_axislabels(axMuHist, {'y':45})
-# #     rotate_axislabels(axMuHist, {'x':45}) 
-   
-    plt.legend(loc='upper left')  
+    axScatter.set_xlabel('Membership', fontsize='x-large')
+    axScatter.set_ylabel('Non-membership', fontsize='x-large')
 
 
 def test_legend():
