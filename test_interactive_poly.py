@@ -1,186 +1,28 @@
 import numpy as np
-from matplotlib.lines import Line2D
-from matplotlib.artist import Artist
-from matplotlib.mlab import dist_point_to_segment
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
 
+dataX = np.array([1,2,3,4,5,6,7,8,9,10])
+dataY = np.array([1193,1225,1125,1644,1255,13676,2007,2008,12359,1210])
 
-class PolygonInteractor(object):
-    """
-    An polygon editor.
+ax = plt.subplot(111)
+def on_click(event):
+    if event.dblclick:
+       ax.plot((event.xdata, event.xdata),
+               (mean-standardDeviation, mean+standardDeviation), 'r-')
+       plt.show()
 
-    Key-bindings
+def _yes(event):
+    print("yolo")
 
-      't' toggle vertex markers on and off.  When vertex markers are on,
-          you can move them, delete them
+mean = np.mean(dataY)
+standardDeviation = np.std(dataY)
 
-      'd' delete the vertex under point
+ax.plot(dataX, dataY, linewidth=0.5)
+plt.connect('button_press_event', on_click)
 
-      'i' insert a vertex at point.  You must be within epsilon of the
-          line connecting two existing vertices
+axcut = plt.axes([0.9, 0.0, 0.1, 0.075])
+bcut = Button(axcut, 'YES', color='red', hovercolor='green')
+bcut.on_clicked(_yes)
 
-    """
-
-
-    def __init__(self, ax, poly, show_ifs=True, show_edges=False):
-        if poly.figure is None:
-            raise RuntimeError('You must first add the polygon to a figure or\
-             canvas before defining the interactor')
-
-        self._showverts = show_ifs
-        self._showedges = show_edges
-        self._epsilon = 5  # max pixel distance to count as a vertex hit
-        
-        
-        self.ax = ax
-        canvas = poly.figure.canvas
-        self.poly = poly
-
-        x, y = zip(*self.poly.xy)
-        self.line = Line2D(x, y, marker='o', markerfacecolor='r',
-                           linestyle=' ', animated=True)
-        self.ax.add_line(self.line)
-        #self._update_line(poly)
-
-        cid = self.poly.add_callback(self.poly_changed)
-        self._ind = None  # the active vert
-
-        canvas.mpl_connect('draw_event', self.draw_callback)
-        canvas.mpl_connect('button_press_event', self.button_press_callback)
-        canvas.mpl_connect('key_press_event', self.key_press_callback)
-        canvas.mpl_connect('button_release_event', self.button_release_callback)
-        canvas.mpl_connect('motion_notify_event', self.motion_notify_callback)
-        self.canvas = canvas
-
-    def draw_callback(self, event):
-        self.background = self.canvas.copy_from_bbox(self.ax.bbox)
-        #self.ax.draw_artist(self.poly)
-        self.ax.draw_artist(self.line)
-        self.canvas.blit(self.ax.bbox)
-
-    def poly_changed(self, poly):
-        'this method is called whenever the polygon object is called'
-        # only copy the artist props to the line (except visibility)
-        vis = self.line.get_visible()
-        Artist.update_from(self.line, poly)
-        self.line.set_visible(vis)  # don't use the poly visibility state
-#         self.line.set_linestyle(' ')
-
-    def get_ind_under_point(self, event):
-        'get the index of the vertex under point if within epsilon tolerance'
-
-        # display coords
-        xy = np.asarray(self.poly.xy)
-        xyt = self.poly.get_transform().transform(xy)
-        xt, yt = xyt[:, 0], xyt[:, 1]
-        d = np.sqrt((xt - event.x)**2 + (yt - event.y)**2)
-        indseq = np.nonzero(np.equal(d, np.amin(d)))[0]
-        ind = indseq[0]
-
-        if d[ind] >= self._epsilon:
-            ind = None
-
-        return ind
-
-    def button_press_callback(self, event):
-        'whenever a mouse button is pressed'
-        if not self._showverts:
-            return
-        if event.inaxes is None:
-            return
-        if event.button != 1:
-            return
-        self._ind = self.get_ind_under_point(event)
-
-    def button_release_callback(self, event):
-        'whenever a mouse button is released'
-        if not self._showverts:
-            return
-        if event.button != 1:
-            return
-        self._ind = None
-
-
-    def key_press_callback(self, event):
-        'whenever a key is pressed'
-        if not event.inaxes:
-            return
-        if event.key == 't':
-            self._showverts = not self._showverts
-            self.line.set_visible(self._showverts)
-            if not self._showverts:
-                self._showedges = False
-                self._ind = None
-                
-        if event.key == '-':
-            self._showedges = not self._showedges
-            if self._showedges:
-                self.line.set_linestyle('-')
-                self._showverts = True
-                self.line.set_visible(True)
-            else:
-                self.line.set_linestyle(' ')
-#         elif event.key == 'd':
-#             ind = self.get_ind_under_point(event)
-#             if ind is not None:
-#                 self.poly.xy = [tup for i, tup in enumerate(self.poly.xy) if i != ind]
-#                 self.line.set_data(zip(*self.poly.xy))
-#         elif event.key == 'i':
-#             xys = self.poly.get_transform().transform(self.poly.xy)
-#             p = event.x, event.y  # display coords
-#             for i in range(len(xys) - 1):
-#                 s0 = xys[i]
-#                 s1 = xys[i + 1]
-#                 d = dist_point_to_segment(p, s0, s1)
-#                 if d <= self._epsilon:
-#                     self.poly.xy = np.array(
-#                         list(self.poly.xy[:i]) +
-#                         [(event.xdata, event.ydata)] +
-#                         list(self.poly.xy[i:]))
-#                     self.line.set_data(zip(*self.poly.xy))
-#                     break
-        self.canvas.draw()
-
-
-    def motion_notify_callback(self, event):
-        'on mouse movement'
-        if not self._showverts:
-            return
-        if self._ind is None:
-            return
-        if event.inaxes is None:
-            return
-        if event.button != 1:
-            return
-        x, y = event.xdata, event.ydata
-
-        self.poly.xy[self._ind] = x, y
-        self.line.set_data(zip(*self.poly.xy))
-
-        self.canvas.restore_region(self.background)
-        # self.ax.draw_artist(self.poly)
-        self.ax.draw_artist(self.line)
-        self.canvas.blit(self.ax.bbox)
-
-
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Polygon
-
-    theta = np.arange(0, 2*np.pi, 0.1)
-    r = 1.5
-
-    xs = r*np.cos(theta)
-    ys = r*np.sin(theta)
-
-    poly = Polygon(list(zip(xs, ys)),fill=None, 
-                   closed=False, animated=True)
-
-    fig, ax = plt.subplots()
-    ax.add_patch(poly)
-    p = PolygonInteractor(ax, poly)
-
-    #ax.add_line(p.line)
-    ax.set_title('Click and drag a point to move it')
-    ax.set_xlim((-2, 2))
-    ax.set_ylim((-2, 2))
-    plt.show()
+plt.show()

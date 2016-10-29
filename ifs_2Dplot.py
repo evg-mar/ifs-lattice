@@ -208,7 +208,8 @@ def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
 def plot_triangular_(ax,
                     mus,nus, rang=1,
                     bins={'mu':10, 'nu':10},
-                    colors={'mu':'b', 'nu':'g', 'elem':'r'}):
+                    colors={'mu':'b', 'nu':'g', 'elem':'r'},
+                    rotation=None):
     assert(type(bins) in [int, dict])
     if type(bins) == int:
         bins = {'mu':bins, 'nu':bins}
@@ -236,7 +237,8 @@ def plot_triangular_(ax,
                               marker='o', markerfacecolor=colors['elem'],
                               linestyle=' ', color='b')
 
-    rotate_axislabels(axScatter, {'x':45,'y':45})
+    if rotation is not None:
+        rotate_axislabels(axScatter, rotation)
 
 #     histMuValues, _, _ = axMuHist.hist(mus, bins=xlinspace, color=colors['mu'])
 #     histNuValues, _, _ = axNuHist.hist(nus, bins=ylinspace, color=colors['nu'],
@@ -272,10 +274,12 @@ def plot_triangular_(ax,
 # #                     fontsize='large',
 #                     loc='upper right')
 
-    axScatter.legend((line2d_,), ("Map of the Universe",),
-                     loc='upper right', fontsize='large')
-    axScatter.set_xlabel('Membership', fontsize='x-large')
-    axScatter.set_ylabel('Non-membership', fontsize='x-large')
+    
+    axScatter.legend(loc='upper right')
+#     axScatter.legend((line2d_,), ("Map of the Universe",),
+#                      loc='upper right', fontsize='large')
+#     axScatter.set_xlabel('Membership', fontsize='x-large')
+#     axScatter.set_ylabel('Non-membership', fontsize='x-large')
     
     return axScatter, line2d_
 
