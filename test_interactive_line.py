@@ -67,7 +67,7 @@ class PropertiesIFS(object):
 
     def draw_line_annotations(self, ax):
         self.draw_annotations(ax)
-        if self.showverts:
+        if self.line.get_visible():
             ax.draw_artist(self.line)
 
 
@@ -184,12 +184,12 @@ class TriangularInteractor(object):
         prop_ifs = self._prop_idx_active[self.line_active__]
         visible = prop_ifs.line.get_visible()
         linestyle = prop_ifs.line.get_linestyle()
-        print(linestyle==' ')
+        print(linestyle is not None)
         print(linestyle)
         
         self.w_check_components = CheckButtons(self.rax_showlines, 
                         ('markers', 'edges', 'labels'),
-                        (visible, linestyle is not None, prop_ifs.show_ann))
+                        (visible, linestyle not in ['None', None], prop_ifs.show_ann))
         self.w_check_components.on_clicked(self.update_show_components)
         return self.w_check_components
 
@@ -274,7 +274,7 @@ class TriangularInteractor(object):
             
             prop_ifs, idx_act = self.active_lines_idx[self.ax_active]
                     
-            if not prop_ifs.showverts:
+            if not prop_ifs.line.get_visible():
                 return
             if idx_act is None:
                 return
@@ -367,7 +367,7 @@ class TriangularInteractor(object):
 
             prop_ifs, _ = self.active_lines_idx[self.ax_active]
 
-            if not prop_ifs.showverts:
+            if not prop_ifs.line.get_visible():
                 return
 
             idx_active = self.get_ind_under_point(event.xdata,
@@ -386,7 +386,7 @@ class TriangularInteractor(object):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs, idx_act = self.active_lines_idx[self.ax_active]
             
-            if not prop_ifs.showverts:
+            if not prop_ifs.line.get_visible():
                 return
         
 #         self.ann.xy = self._released_pos
@@ -401,11 +401,12 @@ class TriangularInteractor(object):
     def _flip_edges(self):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs, _ = self.active_lines_idx[self.ax_active]
-            prop_ifs.showedges = not prop_ifs.showedges
+            linestyle = prop_ifs.line.get_linestyle()
+#             prop_ifs.showedges = not prop_ifs.showedges
 
-            style = '-' if prop_ifs.showedges else ' '
+            style = '-' if linestyle in ['None', None] else ' '
             prop_ifs.line.set_linestyle(style)
-            return prop_ifs.showedges
+            return prop_ifs.line.get_linestyle() 
         # If the active axes is not ax01 or ax02
         return None
 
@@ -413,13 +414,14 @@ class TriangularInteractor(object):
     def _flip_markers(self):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
-            prop_ifs.showverts = not prop_ifs.showverts
+#             prop_ifs.showverts = not prop_ifs.showverts
+            prop_ifs.line.set_visible(not prop_ifs.line.get_visible())
 
-            prop_ifs.line.set_visible(prop_ifs.showverts)
-            if not prop_ifs.showverts:
+#             prop_ifs.line.set_visible(prop_ifs.showverts)
+            if not prop_ifs.line.get_visible():
                 self.active_lines_idx[self.ax_active][self.index_active__] = None
 
-            return prop_ifs.showverts
+            return prop_ifs.line.get_visible()
         # If the active axes is not ax01 or ax02
         return None
 
@@ -493,6 +495,7 @@ if __name__ == '__main__':
                                     mus, nus, ifs01.get_range(), bins=19,
                                     rotation={'x':45, 'y':0})
 
+    line2d1_01.set_linestyle(' ')
     line2d1_01.set_markersize(20)
     line2d1_01.set_markerfacecolor('r')
     line2d1_01.set_color('r')
@@ -512,6 +515,7 @@ if __name__ == '__main__':
                                     bins=19,
                                     rotation={'x':45, 'y':0})
 
+    line2d1_02.set_linestyle(' ')
     line2d1_02.set_markersize(5)
     line2d1_02.set_markerfacecolor('g')
     line2d1_02.set_color('g')
@@ -547,6 +551,13 @@ if __name__ == '__main__':
 
     ax02.get_yaxis().tick_right()
     ax02.set_ylabel('')
+
+    line2d2_02.set_linestyle('-')
+    line2d2_02.set_markersize(5)
+    line2d2_02.set_markerfacecolor('c')
+    line2d2_02.set_color('c')
+    line2d2_02.set_marker(marker=r'o')
+
 #     line2d_01.set_markersize(20)
 #     line2d_01.set_markerfacecolor('r')
 #     line2d_01.set_marker(marker=r'$\odot$')
