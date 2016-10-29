@@ -6,70 +6,7 @@ from ifs_operators_plot import *
 
 from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
 
-import copy
-
-def annotate_points_draw(ax_, line2d_):
-    linepoints = zip(*line2d_.get_data())
-    for idx, pt in enumerate(linepoints):
-        artist_ann = ax_.annotate(str(idx), pt)
-        ax_.draw_artist(artist_ann)
-
-
-class PropertiesIFS(object):
-    def __init__(self, label=None,
-                       line=None,
-                       radius=5,
-                       annotations=None,
-                       alpha_marker=0.5, 
-                       labels_size=12,
-                       show_ann=True,
-                       showverts=True,
-                       showedges=False,
-                       showlabels=False):
-        self.label = label
-        self.line = line
-        self.annotations = annotations
-        self.radius = radius
-        self.alpha_marker = alpha_marker 
-        self.labels_size = labels_size
-
-        self.show_ann = show_ann
-        
-        self.showverts = self.line.get_visible() if showverts is None else showverts 
-        self.showedges = showedges
-        self.showlabels = showlabels
-
-    def init_default(self, ax):
-        self.line.set_visible(True)
-        self.line.set_animated(True)
-
-        self.create_annotations(ax)
-        self.set_visible_annotations(True)
-        self.set_animated_annotations(True)
-
-    def create_annotations(self, ax):
-        linepoints = list(zip(*self.line.get_data()))
-        self.annotations = [ax.annotate(str(idx), pt, fontsize=10) 
-                           for idx, pt in enumerate(linepoints) ]
-
-    def set_visible_annotations(self, value=True):
-        for a in self.annotations:
-            a.set_visible(value)
-
-    def set_animated_annotations(self, value=True):
-        for a in self.annotations:
-            a.set_animated(value)
-
-    def draw_annotations(self, ax):
-        for a in self.annotations:
-            if self.show_ann:
-                ax.draw_artist(a)
-
-    def draw_line_annotations(self, ax):
-        self.draw_annotations(ax)
-        if self.line.get_visible():
-            ax.draw_artist(self.line)
-
+from ifs_properties_plot import PropertiesIFS
 
 class TriangularInteractor(object):
     """
@@ -86,14 +23,16 @@ class TriangularInteractor(object):
     # active index in that line
     line_active__  = 0
     index_active__ = 1
+    
+    slider_length__ = 0.1
+    slider_hight__  = 0.015
+    
+    button_length__ = 0.1
+    button_height__ = 0.1
 
     def __init__(self, ax01, ax02, axlines,
-                       epsilon=0.02,
-                       show_ifs=True, show_edges=True, show_ann=True):
-
-        self._showverts = show_ifs
-        self._showedges = show_edges
-        self._showann = show_ann
+                       epsilon=0.02):
+        
         self._epsilon = epsilon # max pixel distance to count as a vertex hit
 
 
@@ -122,6 +61,12 @@ class TriangularInteractor(object):
         canvas.mpl_connect('motion_notify_event', self.motion_notify_callback)
         self.canvas = canvas
 
+        self.colors_ifs = { }
+        for ax, properties in self.axlines.items():
+            colors_map = {i: prop.line.get_color() \
+                                for i, prop in enumerate(properties)}
+            self.colors_ifs[ax] = colors_map 
+
         self.recreate_widgets()
 
 
@@ -144,7 +89,63 @@ class TriangularInteractor(object):
     def recreate_widgets(self):
         self._recreate_active_ifs_radiobutton()
         self._recreate_radius_slider()
+        self._recreate_alpha_slider()
+        self._recreate_textsize_slider()
         self._recreate_show_lines_check_button()
+
+    def _recreate_textsize_slider(self):
+        if self.ax_active not in self.active_lines_idx.keys():
+            return None
+        
+        axcolor = 'lightgoldenrodyellow'        
+        if hasattr(self, 'textsize_slax'):
+            self.textsize_slax.cla()
+        self.textsize_slax = plt.axes([0.05, 0.11, 
+                                       self.slider_length__, 
+                                       self.slider_hight__], axisbg=axcolor)
+        
+        fontsize = self._prop_idx_active[self.line_active__].annotations[0]\
+                                                        .get_fontsize()
+        fontsize = 10 if fontsize is None else fontsize
+        self.w_sl_textsize = Slider(self.textsize_slax, ' ', 5, 20,
+                                 valinit=fontsize)
+        self.w_sl_textsize.label = self.textsize_slax.text(0.02, 1.5, 
+                             label='Font size',
+                             s='font size: %.f-%.f' %(5,20), 
+                             transform=self.textsize_slax.transAxes,
+                             verticalalignment='center',
+                             horizontalalignment='left')
+        
+        self.w_sl_textsize.on_changed(self.update_fontsize_annotation)
+        return self.w_sl_textsize
+
+        
+    def _recreate_alpha_slider(self):
+        if self.ax_active not in self.active_lines_idx.keys():
+            return None
+        
+        axcolor = 'lightgoldenrodyellow'        
+        if hasattr(self, 'alpha_slax'):
+            self.alpha_slax.cla()
+        self.alpha_slax = plt.axes([0.05, 0.08, 
+                                       self.slider_length__, 
+                                       self.slider_hight__], axisbg=axcolor)
+        
+        alpha = self._prop_idx_active[self.line_active__].line\
+                                                        .get_alpha()
+        alpha = 0.5 if alpha is None else alpha
+        self.w_sl_alpha = Slider(self.alpha_slax, ' ', 0, 1,
+                                 valinit=alpha)
+        self.w_sl_alpha.label = self.alpha_slax.text(0.02, 1.5, 
+                             label='Radius marker',
+                             s='alpha: %.f-%.f' %(0,1), 
+                             transform=self.alpha_slax.transAxes,
+                             verticalalignment='center',
+                             horizontalalignment='left')
+        
+        self.w_sl_alpha.on_changed(self.update_alpha)
+        return self.w_sl_alpha
+        
 
     def _recreate_radius_slider(self):
 
@@ -158,14 +159,16 @@ class TriangularInteractor(object):
         axcolor = 'lightgoldenrodyellow'        
         if hasattr(self, 'radius_slax'):
             self.radius_slax.cla()
-        self.radius_slax = plt.axes([0.05, 0.05, 0.1, 0.015], axisbg=axcolor)
+        self.radius_slax = plt.axes([0.05, 0.05, 
+                                    self.slider_length__, 
+                                    self.slider_hight__], axisbg=axcolor)
         
-        self.w_sl_radius = Slider(self.radius_slax, ' ', 10, 100,
+        self.w_sl_radius = Slider(self.radius_slax, ' ', 5, 100,
                         valinit=self._prop_idx_active[self.line_active__].line\
                                                         .get_markersize())
         self.w_sl_radius.label = self.radius_slax.text(0.02, 1.5, 
                              label='Radius marker',
-                             s='radius: %.f-%.f' %(10,100), 
+                             s='radius: %.f-%.f' %(5,100), 
                              transform=self.radius_slax.transAxes,
                              verticalalignment='center',
                              horizontalalignment='left')
@@ -180,12 +183,12 @@ class TriangularInteractor(object):
         axcolor = 'lightgoldenrodyellow'
         if hasattr(self, 'rax_showlines'):
             self.rax_showlines.cla()
-        self.rax_showlines = plt.axes([0.2, 0.05, 0.15, 0.10], axisbg=axcolor)
+        self.rax_showlines = plt.axes([0.2, 0.05,
+                                       self.button_length__,
+                                       self.button_height__], axisbg=axcolor)
         prop_ifs = self._prop_idx_active[self.line_active__]
         visible = prop_ifs.line.get_visible()
         linestyle = prop_ifs.line.get_linestyle()
-        print(linestyle is not None)
-        print(linestyle)
         
         self.w_check_components = CheckButtons(self.rax_showlines, 
                         ('markers', 'edges', 'labels'),
@@ -200,13 +203,9 @@ class TriangularInteractor(object):
         axcolor = 'lightgoldenrodyellow'
         if hasattr(self, 'rax_activeifs'):
             self.rax_activeifs.cla()
-        self.rax_activeifs = plt.axes([0.37, 0.05, 0.15, 0.07], axisbg=axcolor)
-
-        self.colors_ifs = { }
-        for ax, properties in self.axlines.items():
-            colors_map = {i: prop.line.get_color() \
-                                for i, prop in enumerate(properties)}
-            self.colors_ifs[ax] = colors_map 
+        self.rax_activeifs = plt.axes([0.2+self.button_length__+0.01, 0.05, 
+                                       self.button_length__,
+                                       self.button_height__], axisbg=axcolor)
  
         prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
         idx = self.axlines[self.ax_active].index(prop_ifs)
@@ -228,9 +227,19 @@ class TriangularInteractor(object):
             self._flip_labels()
         self.canvas.draw()
 
+    def update_fontsize_annotation(self, val=None):
+        value = self.w_sl_textsize.val if (val is None) else val
+        self._prop_idx_active[self.line_active__].set_fontsize_annotations(value)
+        self.canvas.draw()
+
+    def update_alpha(self, val=None):
+        value = self.w_sl_alpha.val if (val is None) else val
+        self._prop_idx_active[self.line_active__].line.set_alpha(value)
+        self.canvas.draw()
+
 
     def update_radius(self, val=None):
-        value = self.sl_radius.val if (val is None) else val
+        value = self.w_sl_radius.val if (val is None) else val
         self._prop_idx_active[self.line_active__].line.set_markersize(value)
         self.canvas.draw()
     
@@ -247,15 +256,6 @@ class TriangularInteractor(object):
         for prop_ifs in self.axlines[self.ax02]:
             prop_ifs.draw_line_annotations(self.ax02)
 
-# 
-#         for ann in self.marker_ann:
-#             self.ax01.draw_artist(ann)
-# #         self.ax01.draw_artist(self.ann)
-#         self.ax01.draw_artist(self.line1_01)
-#         
-#         self.ax02.draw_artist(self.line2)
-#         
-#         self.canvas.blit(self.ax02.bbox)
         if self.ax_active is not None:
             self.canvas.blit(self.ax_active.bbox)        
             self.background = \
@@ -307,10 +307,11 @@ class TriangularInteractor(object):
         
         
         if prop_ifs.show_ann:
-            annotation = prop_ifs.annotations[idx_act]
-            annotation.xyann =  pos
-            annotation.xy = pos
-            annotation.xytext = pos
+            prop_ifs.set_data_annotations_single(idx_act, pos)
+#             annotation = prop_ifs.annotations[idx_act]
+#             annotation.xyann =  pos
+#             annotation.xy = pos
+#             annotation.xytext = pos
 
 
     def line_changes(self, line):
@@ -388,12 +389,22 @@ class TriangularInteractor(object):
             
             if not prop_ifs.line.get_visible():
                 return
-        
-#         self.ann.xy = self._released_pos
-#         self.ann.xytext = self._released_pos
-#         self.ann.xyann = self._released_pos
-#         
+
             self.active_lines_idx[self.ax_active][self.index_active__] = None
+
+        if self.ax_active == self.ax01:
+            prop1_ifs01 = self.axlines[self.ax01][0]
+            prop1_ifs02 = self.axlines[self.ax01][1]
+            
+            mus, nus = supStd(prop1_ifs01.line.get_data(),
+                              prop1_ifs02.line.get_data())
+            prop2_ifs01 = self.axlines[self.ax02][0]
+            prop2_ifs01.line.set_data(mus,nus)
+            prop2_ifs01.set_data_annotations(list(zip(mus,nus)))
+
+#             mus2_ifs01, nus2_ifs01 = prop2_ifs01.line.get_data()
+            
+#             prop2_ifs01.line.set_data()
 
         self.canvas.draw()
 
@@ -414,10 +425,8 @@ class TriangularInteractor(object):
     def _flip_markers(self):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
-#             prop_ifs.showverts = not prop_ifs.showverts
             prop_ifs.line.set_visible(not prop_ifs.line.get_visible())
 
-#             prop_ifs.line.set_visible(prop_ifs.showverts)
             if not prop_ifs.line.get_visible():
                 self.active_lines_idx[self.ax_active][self.index_active__] = None
 
@@ -477,7 +486,7 @@ if __name__ == '__main__':
 
 #     fig, ax = plt.subplots()
 
-    universe = UniversalSet(set(range(10)))
+    universe = UniversalSet(set(range(1000)))
 
 
 
@@ -496,11 +505,12 @@ if __name__ == '__main__':
                                     rotation={'x':45, 'y':0})
 
     line2d1_01.set_linestyle(' ')
-    line2d1_01.set_markersize(20)
+    line2d1_01.set_markersize(5)
     line2d1_01.set_markerfacecolor('r')
     line2d1_01.set_color('r')
-    line2d1_01.set_marker(marker=r'$\odot$')
-
+#     line2d1_01.set_marker(marker=r'$\odot$')
+    line2d1_01.set_marker(marker=r'o')    
+    line2d1_01.set_zorder(15)
 
 
     ifs01 = IFS.random(universe, 1, randseed=2)
@@ -520,6 +530,7 @@ if __name__ == '__main__':
     line2d1_02.set_markerfacecolor('g')
     line2d1_02.set_color('g')
     line2d1_02.set_marker(marker=r'o')
+    line2d1_02.set_zorder(15)
 
 
 #     line2d_01.set_alpha(0.5)
