@@ -5,6 +5,7 @@
 # from ifs_operators_plot import *
 
 # from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
+import abc
 
 def annotate_points_draw(ax_, line2d_):
     linepoints = zip(*line2d_.get_data())
@@ -13,9 +14,14 @@ def annotate_points_draw(ax_, line2d_):
         ax_.draw_artist(artist_ann)
 
 
-class PropertiesIFS(object):
+class PropertiesBasic(object):
+
+    __metaclass__  = abc.ABCMeta
+
+#     def __init__(self, posetpool):
+#         self.posetpool = posetpool
     def __init__(self, label=None,
-                       line=None,
+                       holder=None,
                        radius=5,
                        annotations=None,
                        alpha_marker=0.5, 
@@ -25,7 +31,7 @@ class PropertiesIFS(object):
                        showedges=False,
                        showlabels=False):
         self.label = label
-        self.line = line
+        self.holder = holder
         self.annotations = annotations
         self.radius = radius
         self.alpha_marker = alpha_marker 
@@ -33,20 +39,38 @@ class PropertiesIFS(object):
 
         self.show_ann = show_ann
         
-        self.showverts = self.line.get_visible() if showverts is None else showverts 
+        self.showverts = self.holder.get_visible() if showverts is None else showverts 
         self.showedges = showedges
         self.showlabels = showlabels
 
+    @abc.abstractmethod
+    def get_data(self):
+        return
+    
+    @abc.abstractmethod
+    def set_data(self, data):
+        return
+    
+    @abc.abstractclassmethod
+    def get_color(self):
+        return
+
+    @abc.abstractclassmethod
+    def set_color(self):
+        return
+
+
     def init_default(self, ax):
-        self.line.set_visible(True)
-        self.line.set_animated(True)
+        self.holder.set_visible(True)
+        self.holder.set_animated(True)
 
         self.create_annotations(ax)
         self.set_visible_annotations(True)
         self.set_animated_annotations(True)
 
+
     def create_annotations(self, ax):
-        linepoints = list(zip(*self.line.get_data()))
+        linepoints = list(zip(*self.get_data()))
         self.annotations = [ax.annotate(str(idx), pt, fontsize=10, zorder=10) 
                            for idx, pt in enumerate(linepoints) ]
 
@@ -84,7 +108,126 @@ class PropertiesIFS(object):
             if self.show_ann:
                 ax.draw_artist(a)
 
-    def draw_line_annotations(self, ax):
+    def draw_holder_annotations(self, ax):
         self.draw_annotations(ax)
-        if self.line.get_visible():
-            ax.draw_artist(self.line)
+        if self.holder.get_visible():
+            ax.draw_artist(self.holder)                
+#     def _flip_edges(self):
+#         if self.ax_active in self.active_lines_idx.keys():
+#             prop_ifs, _ = self.active_lines_idx[self.ax_active]
+#             linestyle = prop_ifs.line.get_linestyle()
+# #             prop_ifs.showedges = not prop_ifs.showedges
+# 
+#             style = '-' if linestyle in ['None', None] else ' '
+#             prop_ifs.line.set_linestyle(style)
+#             return prop_ifs.line.get_linestyle() 
+#         # If the active axes is not ax01 or ax02
+#         return None
+# 
+# 
+#     def _flip_markers(self):
+#         if self.ax_active in self.active_lines_idx.keys():
+#             prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
+#             prop_ifs.line.set_visible(not prop_ifs.line.get_visible())
+# 
+#             if not prop_ifs.line.get_visible():
+#                 self.active_lines_idx[self.ax_active][self.index_active__] = None
+# 
+#             return prop_ifs.line.get_visible()
+#         # If the active axes is not ax01 or ax02
+#         return None
+# 
+# 
+#     def _flip_labels(self):
+#         if self.ax_active in self.active_lines_idx.keys():
+#             prop_ifs, _ = self.active_lines_idx[self.ax_active]       
+#             prop_ifs.show_ann = not prop_ifs.show_ann
+#             prop_ifs.set_visible_annotations(prop_ifs.show_ann)
+#             return prop_ifs.show_ann
+#         # If the active axes is not ax01 or ax02
+#         return None
+
+
+
+# 
+#     @abc.abstractmethod
+#     def eq(self, first, second):
+  
+class PropertiesPath(PropertiesBasic):
+    
+    def __init__(self, label=None,
+                       holder=None,
+                       radius=5,
+                       annotations=None,
+                       alpha_marker=0.5, 
+                       labels_size=12,
+                       show_ann=True,
+                       showverts=True,
+                       showedges=False,
+                       showlabels=False):
+        
+        super(PropertiesPath, self).__init__(label,
+                       holder,
+                       radius,
+                       annotations,
+                       alpha_marker, 
+                       labels_size,
+                       show_ann,
+                       showverts,
+                       showedges,
+                       showlabels)
+
+#     @abc.abstractmethod
+    def get_data(self):
+#         return PropertiesBasic.get_data(self)
+       return self.holder.get_offset() 
+
+#     @abc.abstractmethod
+    def set_data(self, data):
+        self.holder.set_offcet(data)
+
+    def get_color(self):
+        return self.holder.get_color()
+    
+    def set_color(self):
+        self.holder.set_color()
+
+
+class PropertiesIFS(PropertiesBasic):
+    def __init__(self, label=None,
+                       holder=None,
+                       radius=5,
+                       annotations=None,
+                       alpha_marker=0.5, 
+                       labels_size=12,
+                       show_ann=True,
+                       showverts=True,
+                       showedges=False,
+                       showlabels=False):
+        
+        super(PropertiesIFS, self).__init__(label,
+                       holder,
+                       radius,
+                       annotations,
+                       alpha_marker, 
+                       labels_size,
+                       show_ann,
+                       showverts,
+                       showedges,
+                       showlabels)
+
+
+#     @abc.abstractmethod
+    def get_data(self):
+#         return PropertiesBasic.get_data(self)
+       return self.holder.get_data() 
+
+#     @abc.abstractmethod
+    def set_data(self, mus, nus):
+        self.holder.set_data(mus, nus)
+
+    def get_color(self):
+        return self.holder.get_color()
+    
+    def set_color(self):
+        self.holder.set_color()
