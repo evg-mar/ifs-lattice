@@ -63,11 +63,14 @@ class TriangularInteractor(object):
 
         self.colors_ifs = { }
         for ax, properties in self.axlines.items():
-            colors_map = {i: prop.line.get_color() \
+            colors_map = {i: prop.get_color() \
                                 for i, prop in enumerate(properties)}
             self.colors_ifs[ax] = colors_map 
 
         self.recreate_widgets()
+        
+        self.ax01.set_aspect('equal', 'datalim')
+        self.ax02.set_aspect('equal', 'datalim')
 
 
     def colorfunc(self, label):
@@ -75,7 +78,7 @@ class TriangularInteractor(object):
         prop_ifs_active = self.axlines[self.ax_active][idx]
         self.active_lines_idx[self.ax_active] = [prop_ifs_active,
                                                  None]
-        self.w_rad_active_ifs.activecolor = prop_ifs_active.line.get_color()
+        self.w_rad_active_ifs.activecolor = prop_ifs_active.get_color()
 #         self._recreate_active_ifs_radiobutton()
         self._recreate_radius_slider()
         self._recreate_show_lines_check_button()
@@ -131,8 +134,9 @@ class TriangularInteractor(object):
                                        self.slider_length__, 
                                        self.slider_hight__], axisbg=axcolor)
         
-        alpha = self._prop_idx_active[self.line_active__].line\
+        alpha = self._prop_idx_active[self.line_active__].holder\
                                                         .get_alpha()
+        self._prop_idx_active[self.line_active__].holder.set_alpha(alpha)
         alpha = 0.5 if alpha is None else alpha
         self.w_sl_alpha = Slider(self.alpha_slax, ' ', 0, 1,
                                  valinit=alpha)
@@ -148,11 +152,7 @@ class TriangularInteractor(object):
         
 
     def _recreate_radius_slider(self):
-
-        '''
-        rax = plt.axes([0.75, 0.7, 0.15, 0.15], axisbg=axcolor)
-        radio = RadioButtons(rax, ('2 Hz', '4 Hz', '8 Hz'))
-        '''
+       
         if self.ax_active not in self.active_lines_idx.keys():
             return None
         
@@ -164,7 +164,7 @@ class TriangularInteractor(object):
                                     self.slider_hight__], axisbg=axcolor)
         
         self.w_sl_radius = Slider(self.radius_slax, ' ', 5, 100,
-                        valinit=self._prop_idx_active[self.line_active__].line\
+                        valinit=self._prop_idx_active[self.line_active__].holder\
                                                         .get_markersize())
         self.w_sl_radius.label = self.radius_slax.text(0.02, 1.5, 
                              label='Radius marker',
@@ -174,6 +174,8 @@ class TriangularInteractor(object):
                              horizontalalignment='left')
         
         self.w_sl_radius.on_changed(self.update_radius)
+        print("Visible: %s" % self._prop_idx_active[self.line_active__].\
+              holder.get_visible())
         return self.w_sl_radius
 
     def _recreate_show_lines_check_button(self):
@@ -187,8 +189,8 @@ class TriangularInteractor(object):
                                        self.button_length__,
                                        self.button_height__], axisbg=axcolor)
         prop_ifs = self._prop_idx_active[self.line_active__]
-        visible = prop_ifs.line.get_visible()
-        linestyle = prop_ifs.line.get_linestyle()
+        visible = prop_ifs.holder.get_visible()
+        linestyle = prop_ifs.holder.get_linestyle()
         
         self.w_check_components = CheckButtons(self.rax_showlines, 
                         ('markers', 'edges', 'labels'),
@@ -209,7 +211,7 @@ class TriangularInteractor(object):
  
         prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
         idx = self.axlines[self.ax_active].index(prop_ifs)
-        activecolor = prop_ifs.line.get_color()
+        activecolor = prop_ifs.get_color()
         self.w_rad_active_ifs = \
                 RadioButtons(self.rax_activeifs,
                              sorted(self.colors_ifs[self.ax_active].keys()),
@@ -234,13 +236,13 @@ class TriangularInteractor(object):
 
     def update_alpha(self, val=None):
         value = self.w_sl_alpha.val if (val is None) else val
-        self._prop_idx_active[self.line_active__].line.set_alpha(value)
+        self._prop_idx_active[self.line_active__].holder.set_alpha(value)
         self.canvas.draw()
 
 
     def update_radius(self, val=None):
         value = self.w_sl_radius.val if (val is None) else val
-        self._prop_idx_active[self.line_active__].line.set_markersize(value)
+        self._prop_idx_active[self.line_active__].holder.set_markersize(value)
         self.canvas.draw()
     
 
@@ -251,10 +253,10 @@ class TriangularInteractor(object):
 #         map(lambda ann: self.ax01.draw_artist(ann), self.marker_ann)
 
         for prop_ifs in self.axlines[self.ax01]:
-            prop_ifs.draw_line_annotations(self.ax01)
+            prop_ifs.draw_holder_annotations(self.ax01)
             
         for prop_ifs in self.axlines[self.ax02]:
-            prop_ifs.draw_line_annotations(self.ax02)
+            prop_ifs.draw_holder_annotations(self.ax02)
 
         if self.ax_active is not None:
             self.canvas.blit(self.ax_active.bbox)        
@@ -274,7 +276,7 @@ class TriangularInteractor(object):
             
             prop_ifs, idx_act = self.active_lines_idx[self.ax_active]
                     
-            if not prop_ifs.line.get_visible():
+            if not prop_ifs.holder.get_visible():
                 return
             if idx_act is None:
                 return
@@ -288,7 +290,7 @@ class TriangularInteractor(object):
             self.update_line_annotation(prop_ifs, idx_act, xdata, ydata)
             self.canvas.restore_region(self.background)
 
-            prop_ifs.draw_line_annotations(self.ax_active)
+            prop_ifs.draw_holder_annotations(self.ax_active)
 
         self.canvas.blit(self.ax_active.bbox)
 
@@ -300,10 +302,10 @@ class TriangularInteractor(object):
         else:
             pos = (xdata,ydata)
             
-        line_xy = list(zip(*prop_ifs.line.get_data()))    
+        line_xy = list(zip(*prop_ifs.get_data()))    
         line_xy[idx_act] = pos
 
-        prop_ifs.line.set_data(zip(*line_xy))     
+        prop_ifs.set_data(*zip(*line_xy))     
         
         
         if prop_ifs.show_ann:
@@ -368,12 +370,12 @@ class TriangularInteractor(object):
 
             prop_ifs, _ = self.active_lines_idx[self.ax_active]
 
-            if not prop_ifs.line.get_visible():
+            if not prop_ifs.holder.get_visible():
                 return
 
             idx_active = self.get_ind_under_point(event.xdata,
                                                   event.ydata,
-                                                  prop_ifs.line)
+                                                  prop_ifs.holder)
 
             self.active_lines_idx[self.ax_active][self.index_active__] =\
                                                                  idx_active
@@ -387,7 +389,7 @@ class TriangularInteractor(object):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs, idx_act = self.active_lines_idx[self.ax_active]
             
-            if not prop_ifs.line.get_visible():
+            if not prop_ifs.holder.get_visible():
                 return
 
             self.active_lines_idx[self.ax_active][self.index_active__] = None
@@ -396,10 +398,17 @@ class TriangularInteractor(object):
             prop1_ifs01 = self.axlines[self.ax01][0]
             prop1_ifs02 = self.axlines[self.ax01][1]
             
-            mus, nus = supStd(prop1_ifs01.line.get_data(),
-                              prop1_ifs02.line.get_data())
+#             mus, nus = supStd(prop1_ifs01.line.get_data(),
+#                               prop1_ifs02.line.get_data())
+            print(prop1_ifs01.get_data())
+            mus, nus = incGeneral(prop1_ifs01.get_data(),
+                                 0.6, 0.2, 0.5)
+            print("int button release")
+            print(mus)
+            print(nus)
+
             prop2_ifs01 = self.axlines[self.ax02][0]
-            prop2_ifs01.line.set_data(mus,nus)
+            prop2_ifs01.set_data(mus,nus)
             prop2_ifs01.set_data_annotations(list(zip(mus,nus)))
 
 #             mus2_ifs01, nus2_ifs01 = prop2_ifs01.line.get_data()
@@ -412,12 +421,12 @@ class TriangularInteractor(object):
     def _flip_edges(self):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs, _ = self.active_lines_idx[self.ax_active]
-            linestyle = prop_ifs.line.get_linestyle()
+            linestyle = prop_ifs.holder.get_linestyle()
 #             prop_ifs.showedges = not prop_ifs.showedges
 
             style = '-' if linestyle in ['None', None] else ' '
-            prop_ifs.line.set_linestyle(style)
-            return prop_ifs.line.get_linestyle() 
+            prop_ifs.holder.set_linestyle(style)
+            return prop_ifs.holder.get_linestyle() 
         # If the active axes is not ax01 or ax02
         return None
 
@@ -425,12 +434,12 @@ class TriangularInteractor(object):
     def _flip_markers(self):
         if self.ax_active in self.active_lines_idx.keys():
             prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
-            prop_ifs.line.set_visible(not prop_ifs.line.get_visible())
+            prop_ifs.holder.set_visible(not prop_ifs.holder.get_visible())
 
-            if not prop_ifs.line.get_visible():
+            if not prop_ifs.holder.get_visible():
                 self.active_lines_idx[self.ax_active][self.index_active__] = None
 
-            return prop_ifs.line.get_visible()
+            return prop_ifs.holder.get_visible()
         # If the active axes is not ax01 or ax02
         return None
 
@@ -486,7 +495,7 @@ if __name__ == '__main__':
 
 #     fig, ax = plt.subplots()
 
-    universe = UniversalSet(set(range(1000)))
+    universe = UniversalSet(set(range(10)))
 
 
 
@@ -508,8 +517,8 @@ if __name__ == '__main__':
     line2d1_01.set_markersize(5)
     line2d1_01.set_markerfacecolor('r')
     line2d1_01.set_color('r')
-#     line2d1_01.set_marker(marker=r'$\odot$')
-    line2d1_01.set_marker(marker=r'o')    
+    line2d1_01.set_marker(marker=r'$\odot$')
+#     line2d1_01.set_marker(marker=r'o')    
     line2d1_01.set_zorder(15)
 
 
@@ -573,9 +582,9 @@ if __name__ == '__main__':
 #     line2d_01.set_markerfacecolor('r')
 #     line2d_01.set_marker(marker=r'$\odot$')
 
-    axlines = {ax_01:[PropertiesIFS(label='ifs01', line=line2d1_01),
-                     PropertiesIFS(label='ifs02', line=line2d1_02)],
-               ax02:[PropertiesIFS(label='ifs01', line=line2d2_02)]
+    axlines = {ax_01:[PropertiesIFS(label='ifs01', holder=line2d1_01),
+                     PropertiesIFS(label='ifs02', holder=line2d1_02)],
+               ax02:[PropertiesIFS(label='ifs01', holder=line2d2_02)]
                }
 
     
