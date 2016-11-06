@@ -30,11 +30,11 @@ def main():
  
     ifs01 = IFS.random(universe, 1, randseed=2)
 
-#     plot_ifs(ifs01, typ="interval_valued")
-#     plot_stack(ifs01)
-#     plot_bar_intValued(ifs01)
-#     plot_bar_Intuitionistic(ifs01)
-#     plot_together_intValued(ifs01)
+    plot_ifs(ifs01, typ="interval_valued")
+    plot_stack(ifs01)
+    plot_bar_intValued(ifs01)
+    plot_bar_Intuitionistic(ifs01)
+    plot_together_intValued(ifs01)
 #     plot_together_Intuitionistic(ifs01)
   
     indices, mus, nus, pis = ifs01.elements_split()

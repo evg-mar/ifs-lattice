@@ -284,6 +284,86 @@ def plot_triangular_(ax,
     return axScatter, line2d_
 
 
+
+def plot_triangular_scatter(ax,
+                    mus,nus, rang=1,
+                    bins={'mu':10, 'nu':10},
+                    colors={'mu':'b', 'nu':'g', 'elem':'r'},
+                    rotation=None):
+    assert(type(bins) in [int, dict])
+    if type(bins) == int:
+        bins = {'mu':bins, 'nu':bins}
+
+    axScatter = ax
+#     axNuHist = plt.subplot2grid((4,4), (1,3), rowspan=3, colspan=1,
+#                                 sharey=axScatter)
+#     axMuHist = plt.subplot2grid((4,4), (0,0), rowspan=1, colspan=3,
+#                                 sharex=axScatter)
+
+    # Set ticks to the scatter axes
+    xlinspace = np.linspace(0.0, rang, bins['mu']+1)
+    axScatter.set_xticks(xlinspace)
+    ylinspace = np.linspace(0.0, rang, bins['nu']+1)
+    axScatter.set_yticks(ylinspace)
+    #//
+    # Set invisible the ticks of the histogram axes
+#     plt.setp(axMuHist.get_xticklabels(), visible=False)
+#     plt.setp(axNuHist.get_yticklabels(), visible=False)
+    #//
+
+    plot_triangle(rang, axScatter, 'k')
+    
+    line2d_ = axScatter.scatter(mus, nus, 
+                              marker='o', facecolor=colors['elem'],
+                              linestyle='-', edgecolor='b')
+
+    if rotation is not None:
+        rotate_axislabels(axScatter, rotation)
+
+#     histMuValues, _, _ = axMuHist.hist(mus, bins=xlinspace, color=colors['mu'])
+#     histNuValues, _, _ = axNuHist.hist(nus, bins=ylinspace, color=colors['nu'],
+#                                        orientation='horizontal')
+
+    # Set limits to the histogram axes
+#     histLimit = max(max(histMuValues), max(histNuValues))
+#     axMuHist.set_ylim(0.0, histLimit)
+#     axNuHist.set_xlim(0.0, histLimit)
+    # //Set limits to the histogram axes
+
+    axScatter.grid(True, linestyle='--', color='r')
+    for lin in axScatter.get_xgridlines():
+        lin.set_color(colors['mu'])
+    for lin in axScatter.get_ygridlines():
+        lin.set_color(colors['nu'])
+
+    # Plot legend of the figure /for all subplots/
+#     axLegend = plt.subplot2grid((4,4), (0,3), rowspan=1, colspan=1)
+    # Hide font and ticks of the legend axes
+#     axLegend.patch.set_visible(False)
+#     axLegend.set_axis_off()
+#     plt.setp(axLegend.get_xticklabels(), visible=False)
+#     plt.setp(axLegend.get_yticklabels(), visible=False)
+#     
+#     histMuBars = plt.Rectangle((0, 0), 1, 1, fc=colors['mu'])
+#     histNuBars = plt.Rectangle((0, 0), 1, 1, fc=colors['nu'])
+# 
+#     axLegend.legend((legendSc, histMuBars, histNuBars ),
+#                     ("Map of the Universe",
+#                      "Membership histogram",
+#                      "Non-membership histogram"),
+# #                     fontsize='large',
+#                     loc='upper right')
+
+    
+    axScatter.legend(loc='upper right')
+#     axScatter.legend((line2d_,), ("Map of the Universe",),
+#                      loc='upper right', fontsize='large')
+#     axScatter.set_xlabel('Membership', fontsize='x-large')
+#     axScatter.set_ylabel('Non-membership', fontsize='x-large')
+    
+    return axScatter, line2d_
+
+
 def plot_triangular(mus,nus, rang=1,
                     bins={'mu':10, 'nu':10},
                     colors={'mu':'b', 'nu':'g', 'elem':'r'}):
