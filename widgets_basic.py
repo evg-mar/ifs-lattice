@@ -155,7 +155,7 @@ class WidgetsBasic(object):
                                     self.slider_hight__], axisbg=axcolor)
         
         self.w_sl_radius = Slider(self.radius_slax, ' ', 5, 100,
-                        valinit=self.prop_ifs.holder.get_markersize())
+                        valinit=self.prop_ifs.get_markersize())
         self.w_sl_radius.label = self.radius_slax.text(0.02, 1.5, 
                              label='Radius marker',
                              s='radius: %.f-%.f' %(5,100), 

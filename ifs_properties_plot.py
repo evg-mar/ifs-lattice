@@ -59,6 +59,18 @@ class PropertiesBasic(object):
     def set_color(self):
         return
 
+    
+    @abc.abstractclassmethod
+    def get_markersize(self):
+        return
+
+    @abc.abstractclassmethod
+    def set_markersize(self, size):
+        return
+
+    @abc.abstractclassmethod
+    def draw_holder_annotations(self, ax):
+        return
 
     def init_default(self, ax):
         self.holder.set_visible(True)
@@ -70,9 +82,10 @@ class PropertiesBasic(object):
 
 
     def create_annotations(self, ax):
-        linepoints = list(zip(*self.get_data()))
+        data = self.get_data()
+#         data = list(zip(*self.get_data()))
         self.annotations = [ax.annotate(str(idx), pt, fontsize=10, zorder=10) 
-                           for idx, pt in enumerate(linepoints) ]
+                           for idx, pt in enumerate(data) ]
 
     def set_visible_annotations(self, value=True):
         for a in self.annotations:
@@ -95,9 +108,11 @@ class PropertiesBasic(object):
         ann.xy = pos
         ann.xytext = pos       
 
+#     @abc.abstractclassmethod
     def set_fontsize_annotations(self, fontsize):
         for ann in self.annotations:
             ann.set_fontsize(fontsize)    
+#         return
 
     def set_zorder_annotations(self, zorder):
         for ann in self.annotations:
@@ -108,50 +123,6 @@ class PropertiesBasic(object):
             if self.show_ann:
                 ax.draw_artist(a)
 
-    def draw_holder_annotations(self, ax):
-        self.draw_annotations(ax)
-        if self.holder.get_visible():
-            ax.draw_artist(self.holder)                
-#     def _flip_edges(self):
-#         if self.ax_active in self.active_lines_idx.keys():
-#             prop_ifs, _ = self.active_lines_idx[self.ax_active]
-#             linestyle = prop_ifs.line.get_linestyle()
-# #             prop_ifs.showedges = not prop_ifs.showedges
-# 
-#             style = '-' if linestyle in ['None', None] else ' '
-#             prop_ifs.line.set_linestyle(style)
-#             return prop_ifs.line.get_linestyle() 
-#         # If the active axes is not ax01 or ax02
-#         return None
-# 
-# 
-#     def _flip_markers(self):
-#         if self.ax_active in self.active_lines_idx.keys():
-#             prop_ifs = self.active_lines_idx[self.ax_active][self.line_active__]
-#             prop_ifs.line.set_visible(not prop_ifs.line.get_visible())
-# 
-#             if not prop_ifs.line.get_visible():
-#                 self.active_lines_idx[self.ax_active][self.index_active__] = None
-# 
-#             return prop_ifs.line.get_visible()
-#         # If the active axes is not ax01 or ax02
-#         return None
-# 
-# 
-#     def _flip_labels(self):
-#         if self.ax_active in self.active_lines_idx.keys():
-#             prop_ifs, _ = self.active_lines_idx[self.ax_active]       
-#             prop_ifs.show_ann = not prop_ifs.show_ann
-#             prop_ifs.set_visible_annotations(prop_ifs.show_ann)
-#             return prop_ifs.show_ann
-#         # If the active axes is not ax01 or ax02
-#         return None
-
-
-
-# 
-#     @abc.abstractmethod
-#     def eq(self, first, second):
   
 class PropertiesPath(PropertiesBasic):
     
@@ -180,17 +151,31 @@ class PropertiesPath(PropertiesBasic):
 #     @abc.abstractmethod
     def get_data(self):
 #         return PropertiesBasic.get_data(self)
-       return self.holder.get_offset() 
+       return self.holder.get_offsets() 
 
 #     @abc.abstractmethod
     def set_data(self, data):
-        self.holder.set_offcet(data)
+        self.holder.set_offsets(data)
 
     def get_color(self):
-        return self.holder.get_color()
+        return self.holder._facecolors_original
     
-    def set_color(self):
-        self.holder.set_color()
+    def set_color(self, color):
+        self.holder.set_facecolor(color)
+
+    def get_markersize(self):
+        return self.holder._sizes
+
+    def set_markersize(self,size):
+        self.holder.set_sizes(size)
+
+    def draw_holder_annotations(self, ax):
+        self.draw_annotations(ax)
+        if self.holder.get_visible():
+#              ax.figure.canvas.renderer.draw_path_collection(self.holder)
+            self.holder.draw(ax.figure.canvas.renderer)
+#             ax.draw_artist(self.holder)                
+    
 
 
 class PropertiesIFS(PropertiesBasic):
@@ -220,14 +205,84 @@ class PropertiesIFS(PropertiesBasic):
 #     @abc.abstractmethod
     def get_data(self):
 #         return PropertiesBasic.get_data(self)
-       return self.holder.get_data() 
+#        return self.holder.get_data() 
+       return list(zip(*self.holder.get_data()))
 
 #     @abc.abstractmethod
     def set_data(self, mus, nus):
         self.holder.set_data(mus, nus)
+
+    def get_data_pair(self):
+        return self.holder.get_data()
 
     def get_color(self):
         return self.holder.get_color()
     
     def set_color(self):
         self.holder.set_color()
+
+
+    def get_markersize(self):
+        return self.holder.get_markersize()
+
+    def set_markersize(self,size):
+        self.holder.set_markersize(size)
+
+    def draw_holder_annotations(self, ax):
+        self.draw_annotations(ax)
+        if self.holder.get_visible():
+#             ax.figure.canvas.renderer.draw_path_collection(self.holder)
+#             self.holder.draw(ax.figure.canvas.renderer)
+            ax.draw_artist(self.holder)                
+
+
+
+##############################################################
+#######
+##############################################################
+import ifs_operators_plot as oper  
+
+class TopoConst(object):
+    def __init__(self, alpha, beta, gamma):
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
+    
+
+class PropertiesIFSTopo(PropertiesIFS):
+    def __init__(self, label=None,
+                       holder=None,
+                       topo_const=None,
+                       radius=5,
+                       annotations=None,
+                       alpha_marker=0.5, 
+                       labels_size=12,
+                       show_ann=True,
+                       showverts=True,
+                       showedges=False,
+                       showlabels=False):
+        
+        super(PropertiesIFSTopo, self).__init__(label,
+                       holder,
+                       radius,
+                       annotations,
+                       alpha_marker, 
+                       labels_size,
+                       show_ann,
+                       showverts,
+                       showedges,
+                       showlabels)
+
+        self.topo_const = topo_const
+
+    def incGeneral(self):
+        return oper.incGeneral(self.get_data_pair(),
+                        self.topo_const.alpha,
+                        self.topo_const.beta,
+                        self.topo_const.gamma)
+
+    def clGeneral(self):
+        return oper.clGeneral(self.get_data_pair(),
+                       self.topo_const.alpha,
+                       self.topo_const.beta,
+                       self.topo_const.gamma)

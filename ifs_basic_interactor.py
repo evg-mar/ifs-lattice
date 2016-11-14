@@ -50,7 +50,7 @@ class TriangularInteractorBasic(object):
 
         self.colors_ifs = { }
         for ax, properties in self.axlines.items():
-            colors_map = {i: prop.holder.get_color() \
+            colors_map = {i: prop.get_color() \
                                 for i, prop in enumerate(properties)}
             self.colors_ifs[ax] = colors_map 
 
@@ -336,16 +336,18 @@ if __name__ == '__main__':
     indices, mus, nus, pis = ifs01.elements_split()
     
     ax = plt.subplot2grid((4,6), (0,0), rowspan=3, colspan=3)
-    ax_01, line2d1_01 = plot_triangular_(ax,
+    line2d1_01 = plot_triangular_scatter(ax,
                                     mus, nus, ifs01.get_range(), bins=19,
                                     rotation={'x':45, 'y':0})
 
-    line2d1_01.set_linestyle(' ')
-    line2d1_01.set_markersize(5)
-    line2d1_01.set_markerfacecolor('r')
-    line2d1_01.set_color('r')
+#     line2d1_01.set_linestyle(' ')
+    line2d1_01.set_linestyle([None,None])    
+#     line2d1_01.set_markersize(5)
+
+    line2d1_01.set_facecolor('r')
+    line2d1_01.set_edgecolor('r')
 #     line2d1_01.set_marker(marker=r'$\odot$')
-    line2d1_01.set_marker(marker=r'o')    
+#     line2d1_01.set_marker(marker=r'o')    
     line2d1_01.set_zorder(15)
 
 
@@ -354,18 +356,22 @@ if __name__ == '__main__':
     indices, mus, nus, pis = ifs01.elements_split()
 
     colors={'mu':'b', 'nu':'g', 'elem':'r'}
-    ax_01, line2d1_02 = plot_triangular_(ax,
+#     plot_triangular_scatter
+    line2d1_02 = plot_triangular_scatter(ax,
                                     mus, nus,
                                     ifs01.get_range(),
                                     colors=colors,
                                     bins=19,
                                     rotation={'x':45, 'y':0})
 
-    line2d1_02.set_linestyle(' ')
-    line2d1_02.set_markersize(5)
-    line2d1_02.set_markerfacecolor('g')
-    line2d1_02.set_color('g')
-    line2d1_02.set_marker(marker=r'o')
+#     line2d1_02.set_linestyle(' ')
+    line2d1_02.set_linestyle([None,None])
+#     line2d1_02.set_markersize(5)
+#     line2d1_02.set_markerfacecolor('g')
+#     line2d1_02.set_color('g')
+    line2d1_02.set_facecolor('r')
+    line2d1_02.set_edgecolor('r')
+#     line2d1_02.set_marker(marker=r'o')
     line2d1_02.set_zorder(15)
 
 
@@ -392,18 +398,19 @@ if __name__ == '__main__':
     
 
      
-    _, line2d2_02 = plot_triangular_(ax02,
+    line2d2_02 = plot_triangular_scatter(ax02,
                                     mus, nus, ifs02.get_range(), bins=19,
                                     rotation={'x':45, 'y':0})
 
     ax02.get_yaxis().tick_right()
     ax02.set_ylabel('')
 
-    line2d2_02.set_linestyle('-')
-    line2d2_02.set_markersize(5)
-    line2d2_02.set_markerfacecolor('c')
-    line2d2_02.set_color('c')
-    line2d2_02.set_marker(marker=r'o')
+#     line2d2_02.set_linestyle('-')
+    line2d2_02.set_linestyle([None,None])
+#     line2d2_02.set_markersize(5)
+#     line2d2_02.set_markerfacecolor('c')
+#     line2d2_02.set_color('c')
+#     line2d2_02.set_marker(marker=r'o')
 
 #     line2d_01.set_markersize(20)
 #     line2d_01.set_markerfacecolor('r')
@@ -412,13 +419,13 @@ if __name__ == '__main__':
 
     widgets = WidgetsBasic(None)
 
-    axlines = {ax_01:[PropertiesIFS(label='ifs01_ax01', holder=line2d1_01),
-                     PropertiesIFS(label='ifs02_ax01', holder=line2d1_02)],
-               ax02:[PropertiesIFS(label='ifs01_ax02', holder=line2d2_02)]
+    axlines = {ax:[PropertiesPath(label='ifs01_ax01', holder=line2d1_01),
+                     PropertiesPath(label='ifs02_ax01', holder=line2d1_02)],
+               ax02:[PropertiesPath(label='ifs01_ax02', holder=line2d2_02)]
                }
 
     
-    p = TriangularInteractorBasic(ax_01, ax02, axlines, widgets)
+    p = TriangularInteractorBasic(ax, ax02, axlines, widgets)
     
 #     p = TriangularInteractor(ax_01, line2d_01)
     

@@ -2,9 +2,9 @@ import copy
 import numpy as np
 
 import matplotlib.pyplot as plt
-from matplotlib import style
+# from matplotlib import style
 
-style.use('ggplot')
+# style.use('ggplot')
 
 
 def rotate_axislabels(ax, angles={'x': 45,'y': 45,'z': 45}):
@@ -361,7 +361,7 @@ def plot_triangular_scatter(ax,
 #     axScatter.set_xlabel('Membership', fontsize='x-large')
 #     axScatter.set_ylabel('Non-membership', fontsize='x-large')
     
-    return axScatter, line2d_
+    return line2d_
 
 
 def plot_triangular(mus,nus, rang=1,
