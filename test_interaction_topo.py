@@ -124,15 +124,21 @@ class TriangularInteractorBasic(object):
             xdata = min(max(0.0, event.xdata), 1.0) 
             ydata = min(max(0.0, event.ydata), 1.0) 
 #             print('on mouse movement')
-            self.update_holder_annotation(prop_ifs, idx_act, xdata, ydata)
+            if idx_act > -1:
+                self.update_holder_annotation(prop_ifs,
+                                              idx_act,
+                                              xdata, ydata)
+            elif idx_act == -1:
+                prop_ifs.update_topo_const(self.ax_active,
+                                           xdata, ydata)
             self.canvas.restore_region(self.background)
 
             prop_ifs.draw_holder_annotations(self.ax_active)
 
         self.canvas.blit(self.ax_active.bbox)
 
-
-    def update_holder_annotation(self, prop_ifs, idx_act, xdata, ydata):
+    @classmethod
+    def update_holder_annotation(cls, prop_ifs, idx_act, xdata, ydata):
 #         print("..in update holder annotations...")
         if xdata + ydata >= 1.0:
             pos = ((xdata-ydata+1)/2, (ydata-xdata+1)/2)
@@ -177,9 +183,16 @@ class TriangularInteractorBasic(object):
         print('get the index..')
         print(prop_ifs.get_data_pair())
         print(xy)
-        x, y = xy[0], xy[1]
-        print('type:')
-        print(type(x))
+        x0, y0 = xy[0], xy[1]
+
+        x = np.zeros(len(x0)+1, dtype=float)
+        x[0:-1] = x0
+        x[-1] = prop_ifs.topo_const.alpha
+        
+        y = np.zeros(len(y0)+1, dtype=float)
+        y[0:-1] = y0
+        y[-1] = prop_ifs.topo_const.beta
+        
 #         print(x)
 #         print(y)
 #         print(event.xdata, event.ydata)
@@ -192,6 +205,7 @@ class TriangularInteractorBasic(object):
         ind = indseq[0]
         
         ind = None if (d[ind] >= self._epsilon) else ind
+        ind = -1 if ind == len(x0) else ind
         return ind
 
     def recreate_widgets(self):
@@ -433,16 +447,17 @@ if __name__ == '__main__':
 
     widgets = WidgetsBasic(None)
     
-    topo_c = TopoConst(0.6, 0.2, 0.5)
+    topo_c01 = TopoConst(ax_01, 0.6, 0.2, 0.5)
+    topo_c02 = TopoConst(ax02, 0.6, 0.2, 0.5)    
 
     axlines = {ax_01:[PropertiesIFSTopo(label='ifs01_ax01', holder=line2d1_01,
-                                        topo_const=topo_c),
+                                        topo_const=topo_c01),
                      PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02,
-                                       topo_const=topo_c)],
+                                       topo_const=topo_c01)],
                ax02:[PropertiesIFSTopo(label='ifs01_ax02', holder=line2d2_01,
-                                       topo_const=topo_c),
+                                       topo_const=topo_c02),
                      PropertiesIFSTopo(label='ifs02_ax02', holder=line2d2_02,
-                                       topo_const=topo_c)]
+                                       topo_const=topo_c02)]
                }
 
     

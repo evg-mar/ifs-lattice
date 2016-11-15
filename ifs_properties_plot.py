@@ -233,7 +233,7 @@ class PropertiesIFS(PropertiesBasic):
         if self.holder.get_visible():
 #             ax.figure.canvas.renderer.draw_path_collection(self.holder)
 #             self.holder.draw(ax.figure.canvas.renderer)
-            ax.draw_artist(self.holder)                
+            ax.draw_artist(self.holder)
 
 
 
@@ -241,13 +241,42 @@ class PropertiesIFS(PropertiesBasic):
 #######
 ##############################################################
 import ifs_operators_plot as oper  
+import matplotlib.pyplot as plt 
 
 class TopoConst(object):
-    def __init__(self, alpha, beta, gamma):
+    def __init__(self, ax, alpha, beta, gamma):
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
-    
+
+        self.alpha2dline, = ax.plot([alpha]*3,
+                                  [0.0, beta,  1-alpha],
+                                  color='r',
+                                  animated=True)
+        
+        self.beta2dline, = ax.plot([0.0, alpha, 1 - beta],
+                                  [beta]*3,
+                                  color='g',
+                                  animated=True)
+
+
+
+        self.update_const(ax, alpha, beta)
+
+    def update_const(self, ax, alpha, beta):
+        self.alpha = alpha
+        self.beta = beta
+        
+        self.alpha2dline.set_data([alpha]*3,
+                                  [0.0, beta,  1-alpha])
+        self.beta2dline.set_data([0.0, alpha, 1 - beta],
+                                  [beta]*3)
+
+    def draw_topo_object(self, ax):
+        ax.draw_artist(self.alpha2dline)
+        ax.draw_artist(self.beta2dline)
+
+
 
 class PropertiesIFSTopo(PropertiesIFS):
     def __init__(self, label=None,
@@ -261,7 +290,7 @@ class PropertiesIFSTopo(PropertiesIFS):
                        showverts=True,
                        showedges=False,
                        showlabels=False):
-        
+    
         super(PropertiesIFSTopo, self).__init__(label,
                        holder,
                        radius,
@@ -274,6 +303,13 @@ class PropertiesIFSTopo(PropertiesIFS):
                        showlabels)
 
         self.topo_const = topo_const
+
+    def update_topo_const(self, ax, alpha, beta):
+        self.topo_const.update_const(ax, alpha, beta)
+
+    def draw_holder_annotations(self, ax):
+        super(PropertiesIFSTopo, self).draw_holder_annotations(ax)
+        self.topo_const.draw_topo_object(ax)  
 
     def incGeneral(self):
         return oper.incGeneral(self.get_data_pair(),
