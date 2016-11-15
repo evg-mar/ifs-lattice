@@ -111,13 +111,16 @@ class TriangularInteractorBasic(object):
             self.ax_active = event.inaxes
             
             prop_ifs, idx_act = self.active_lines_idx[self.ax_active]
-                    
+        
             if not prop_ifs.holder.get_visible():
                 return
             if idx_act is None:
 #                 print('idx_act %d' % -1 if idx_act is None else idx_act)
                 return
 
+            ax_inactive = self.ax01 if self.ax01!=self.ax_active else self.ax02
+            prop_ifs_inactive, = self.active_lines_idx[ax_inactive]
+                
             # The drop & drag point should stay
             # within the triangular area
 
@@ -128,9 +131,14 @@ class TriangularInteractorBasic(object):
                 self.update_holder_annotation(prop_ifs,
                                               idx_act,
                                               xdata, ydata)
+#                self.update_holder_annotation(prop_ifs_inactive,
+#                                              idx_act,
+#                                              xdata, ydata)                
             elif idx_act == -1:
                 prop_ifs.update_topo_const(self.ax_active,
                                            xdata, ydata)
+#                prop_ifs_inactive.update_topo_const(ax_inactive,
+#                                                    xdata, ydata)
             self.canvas.restore_region(self.background)
 
             prop_ifs.draw_holder_annotations(self.ax_active)
