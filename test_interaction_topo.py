@@ -119,7 +119,7 @@ class TriangularInteractorBasic(object):
                 return
 
             ax_inactive = self.ax01 if self.ax01!=self.ax_active else self.ax02
-            prop_ifs_inactive, = self.active_lines_idx[ax_inactive]
+            prop_ifs_inactive, _ = self.active_lines_idx[ax_inactive]
                 
             # The drop & drag point should stay
             # within the triangular area
@@ -137,8 +137,8 @@ class TriangularInteractorBasic(object):
             elif idx_act == -1:
                 prop_ifs.update_topo_const(self.ax_active,
                                            xdata, ydata)
-#                prop_ifs_inactive.update_topo_const(ax_inactive,
-#                                                    xdata, ydata)
+                prop_ifs_inactive.update_topo_const(ax_inactive,
+                                                    xdata, ydata)
             self.canvas.restore_region(self.background)
 
             prop_ifs.draw_holder_annotations(self.ax_active)
@@ -428,7 +428,7 @@ if __name__ == '__main__':
     ax02.get_yaxis().tick_right()
     ax02.set_ylabel('')
 
-    line2d2_01.set_linestyle('-')
+    line2d2_01.set_linestyle(' ')
     line2d2_01.set_markersize(5)
     line2d2_01.set_markerfacecolor('r')
     line2d2_01.set_color('r')
@@ -442,7 +442,7 @@ if __name__ == '__main__':
     ax02.get_yaxis().tick_right()
     ax02.set_ylabel('')
 
-    line2d2_02.set_linestyle('-')
+    line2d2_02.set_linestyle(' ')
     line2d2_02.set_markersize(5)
     line2d2_02.set_markerfacecolor('g')
     line2d2_02.set_color('g')
@@ -455,17 +455,20 @@ if __name__ == '__main__':
 
     widgets = WidgetsBasic(None)
     
-    topo_c01 = TopoConst(ax_01, 0.6, 0.2, 0.5)
-    topo_c02 = TopoConst(ax02, 0.6, 0.2, 0.5)    
+    topo_c0101 = TopoConst(ax_01, 0.7, 0.2, 0.5)
+    topo_c0102 = TopoConst(ax_01, 0.6, 0.2, 0.5)
+    
+    topo_c0201 = TopoConst(ax02, 0.7, 0.2, 0.5)    
+    topo_c0202 = TopoConst(ax02, 0.6, 0.2, 0.5)        
 
     axlines = {ax_01:[PropertiesIFSTopo(label='ifs01_ax01', holder=line2d1_01,
-                                        topo_const=topo_c01),
+                                        topo_const=topo_c0101),
                      PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02,
-                                       topo_const=topo_c01)],
+                                       topo_const=topo_c0102)],
                ax02:[PropertiesIFSTopo(label='ifs01_ax02', holder=line2d2_01,
-                                       topo_const=topo_c02),
+                                       topo_const=topo_c0201),
                      PropertiesIFSTopo(label='ifs02_ax02', holder=line2d2_02,
-                                       topo_const=topo_c02)]
+                                       topo_const=topo_c0202)]
                }
 
     
