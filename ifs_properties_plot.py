@@ -281,6 +281,14 @@ class TopoConst(object):
     def draw_topo_object(self, ax):
         ax.draw_artist(self.alpha2dline)
         ax.draw_artist(self.beta2dline)
+        
+    def set_visible(self, flag):
+        self.alpha2dline.set_visible(flag)
+        self.beta2dline.set_visible(flag)
+    
+    def get_visible(self):
+        return self.alpha2dline.get_visible() and \
+               self.beta2dline.get_visible()
 
 
 
