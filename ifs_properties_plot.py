@@ -26,6 +26,7 @@ class PropertiesBasic(object):
                        annotations=None,
                        alpha_marker=0.5, 
                        labels_size=12,
+                       hide_ifs=False,
                        show_ann=True,
                        showverts=True,
                        showedges=False,
@@ -37,6 +38,7 @@ class PropertiesBasic(object):
         self.alpha_marker = alpha_marker 
         self.labels_size = labels_size
 
+        self.hide_ifs = hide_ifs
         self.show_ann = show_ann
         
         self.showverts = self.holder.get_visible() if showverts is None else showverts 
@@ -132,6 +134,7 @@ class PropertiesPath(PropertiesBasic):
                        annotations=None,
                        alpha_marker=0.5, 
                        labels_size=12,
+                       hide_ifs=False,
                        show_ann=True,
                        showverts=True,
                        showedges=False,
@@ -143,6 +146,7 @@ class PropertiesPath(PropertiesBasic):
                        annotations,
                        alpha_marker, 
                        labels_size,
+                       hide_ifs,
                        show_ann,
                        showverts,
                        showedges,
@@ -185,6 +189,7 @@ class PropertiesIFS(PropertiesBasic):
                        annotations=None,
                        alpha_marker=0.5, 
                        labels_size=12,
+                       hide_ifs=False,
                        show_ann=True,
                        showverts=True,
                        showedges=False,
@@ -196,6 +201,7 @@ class PropertiesIFS(PropertiesBasic):
                        annotations,
                        alpha_marker, 
                        labels_size,
+                       hide_ifs,
                        show_ann,
                        showverts,
                        showedges,
@@ -287,6 +293,7 @@ class PropertiesIFSTopo(PropertiesIFS):
                        alpha_marker=0.5, 
                        labels_size=12,
                        show_ann=True,
+                       hide_ifs=False,
                        showverts=True,
                        showedges=False,
                        showlabels=False):
@@ -297,6 +304,7 @@ class PropertiesIFSTopo(PropertiesIFS):
                        annotations,
                        alpha_marker, 
                        labels_size,
+                       hide_ifs,
                        show_ann,
                        showverts,
                        showedges,

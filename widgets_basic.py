@@ -110,8 +110,6 @@ class WidgetsBasic(object):
 
 
     def _recreate_alpha_slider(self):
-#         if self.ax_active not in self.active_lines_idx.keys():
-#             return None
 
         axcolor = 'lightgoldenrodyellow'
         if hasattr(self, 'alpha_slax'):
@@ -121,7 +119,7 @@ class WidgetsBasic(object):
                                        self.slider_hight__], axisbg=axcolor)
         
         alpha = self.prop_ifs.holder.get_alpha()
-#         self._prop_idx_active[self.line_active__].holder.set_alpha(alpha)
+
         alpha = 0.5 if alpha is None else alpha
         self.w_sl_alpha = Slider(self.alpha_slax, ' ', 0, 1,
                                  valinit=alpha)
@@ -143,10 +141,7 @@ class WidgetsBasic(object):
         
 
     def _recreate_radius_slider(self):
-#        
-#         if self.ax_active not in self.active_lines_idx.keys():
-#             return None
-#         
+
         axcolor = 'lightgoldenrodyellow'        
         if hasattr(self, 'radius_slax'):
             self.radius_slax.cla()
@@ -162,7 +157,7 @@ class WidgetsBasic(object):
                              transform=self.radius_slax.transAxes,
                              verticalalignment='center',
                              horizontalalignment='left')
-        
+
         def update_radius(val=None):
             value = self.w_sl_radius.val if (val is None) else val
             self.prop_ifs.holder.set_markersize(value)
@@ -174,8 +169,6 @@ class WidgetsBasic(object):
         return self.w_sl_radius
 
     def _recreate_show_lines_check_button(self):
-#         if self.ax_active not in self.active_lines_idx.keys():
-#             return None
 
         axcolor = 'lightgoldenrodyellow'
         if hasattr(self, 'rax_showlines'):
@@ -183,57 +176,82 @@ class WidgetsBasic(object):
         self.rax_showlines = plt.axes([0.2, 0.05,
                                        self.button_length__,
                                        self.button_height__], axisbg=axcolor)
-#         prop_ifs = self._prop_idx_active[self.line_active__]
+
         visible = self.prop_ifs.holder.get_visible()
         linestyle = self.prop_ifs.holder.get_linestyle()
-        
+
+        labels = ('hide ifs',
+                 'markers', 
+                 'edges',
+                 'labels')
+        actives = (self.prop_ifs.hide_ifs,
+                   visible,
+                   linestyle not in ['None', None],
+                   self.prop_ifs.show_ann)
+
+        self.holder_actives = dict(zip(labels, actives))        
+
         self.w_check_components = CheckButtons(self.rax_showlines, 
-                    ('markers', 
-                     'edges',
-                     'labels'),
-                    (visible,
-                     linestyle not in ['None', None],
-                     self.prop_ifs.show_ann))
+                    labels,
+                    actives)
 
         def update_show_components(label):
-            if label == 'markers':
-                self._flip_markers()
+            self.holder_actives[label] = not self.holder_actives[label]
+            
+            if label == 'hide ifs':
+                if self.holder_actives[label]:
+                    self.prop_ifs.holder.set_linestyle(' ')
+                    self.prop_ifs.holder.set_visible(False)
+                    self.prop_ifs.set_visible_annotations(False)
+                else:
+                    self.prop_ifs.holder.set_linestyle(' ')
+                    self.prop_ifs.holder.set_visible(True)
+                    self.prop_ifs.set_visible_annotations(True)
+
+            elif label == 'markers':
+                self.prop_ifs.holder.set_visible(self.holder_actives[label])
+
             elif label == 'edges':
-                self._flip_edges()
+                style = '-' if self.holder_actives[label] else ' '
+                self.prop_ifs.holder.set_linestyle(style)
+
             elif label == 'labels':
-                self._flip_labels()
+                self.prop_ifs.set_visible_annotations(self.holder_actives[label])
 
             if self.canvas is not None:
                 self.canvas.draw()
 
-
-        
         self.w_check_components.on_clicked(update_show_components)
         return self.w_check_components
 
-
-    def _flip_edges(self):
-
-        linestyle = self.prop_ifs.holder.get_linestyle()
-#             prop_ifs.showedges = not prop_ifs.showedges
-
-        style = '-' if linestyle in ['None', None] else ' '
-        self.prop_ifs.holder.set_linestyle(style)
-        return self.prop_ifs.holder.get_linestyle() 
-
-    def _flip_markers(self):
-
-        self.prop_ifs.holder.set_visible(not self.prop_ifs.holder.get_visible())
-
-#         if not self.prop_ifs.holder.get_visible():
-#             self.active_lines_idx[self.ax_active][self.index_active__] = None
-
-        return self.prop_ifs.holder.get_visible()
-        
-
-    def _flip_labels(self):
-
-        self.prop_ifs.show_ann = not self.prop_ifs.show_ann
-        self.prop_ifs.set_visible_annotations(self.prop_ifs.show_ann)
-        return self.prop_ifs.show_ann
-        
+#     def _flip_hide_ifs(self):
+#         if self.holder_actives['hide ifs']:
+#             
+#         if self.prop_ifs.holder.get_linestyle() == '-':
+#             self._flip_edges()
+#         if self.prop_ifs.holder.get_visible():
+#             self._flip_markers()
+#         if self.prop_ifs.show_ann:
+#             self._flip_labels()            
+# 
+#     def _flip_edges(self):
+# 
+#         linestyle = self.prop_ifs.holder.get_linestyle()
+# 
+#         style = '-' if linestyle in ['None', None] else ' '
+#         self.prop_ifs.holder.set_linestyle(style)
+#         return self.prop_ifs.holder.get_linestyle()
+# 
+# 
+#     def _flip_markers(self):
+# 
+#         self.prop_ifs.holder.set_visible(not self.prop_ifs.holder.get_visible())
+# 
+#         return self.prop_ifs.holder.get_visible()
+# 
+# 
+#     def _flip_labels(self):
+# 
+#         self.prop_ifs.show_ann = not self.prop_ifs.show_ann
+#         self.prop_ifs.set_visible_annotations(self.prop_ifs.show_ann)
+#         return self.prop_ifs.show_ann
