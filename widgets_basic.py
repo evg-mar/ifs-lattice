@@ -18,10 +18,9 @@ class WidgetsSimple(object):
 
     @property
     def prop_ifs(self):
-        return self.active_prop[0]
+        return self.active_prop
 
-    def recreate_widgets_(self, # prop_ifs, idx_active, 
-                         active_prop):
+    def recreate_widgets_(self, active_prop):
 #         self.prop_ifs = active_prop[0]
         self.active_prop = active_prop
 #         self._recreate_active_ifs_radiobutton(idx_active, props)
@@ -147,36 +146,26 @@ class WidgetsSimple(object):
                     labels,
                     actives)
 
-        def update_show_components(label):
-            self.holder_actives[label] = not self.holder_actives[label]
-            
-            if label == 'hide ifs':
-                if self.holder_actives[label]:
-                    self.prop_ifs.holder.set_linestyle(' ')
-                    self.prop_ifs.holder.set_visible(False)
-                    self.prop_ifs.set_visible_annotations(False)
-                    self.prop_ifs.topo_const.set_visible(False)
-                else:
-                    self.prop_ifs.holder.set_linestyle(' ')
-                    self.prop_ifs.holder.set_visible(True)
-                    self.prop_ifs.set_visible_annotations(True)
-                    self.prop_ifs.topo_const.set_visible(True)                    
 
-            elif label == 'markers':
-                self.prop_ifs.holder.set_visible(self.holder_actives[label])
-
-            elif label == 'edges':
-                style = '-' if self.holder_actives[label] else ' '
-                self.prop_ifs.holder.set_linestyle(style)
-
-            elif label == 'labels':
-                self.prop_ifs.set_visible_annotations(self.holder_actives[label])
-
-            if self.canvas is not None:
-                self.canvas.draw()
-
-        self.w_check_components.on_clicked(update_show_components)
+        self.w_check_components.on_clicked(self.update_show_components)
         return self.w_check_components
+
+
+    def update_show_components(self, label):
+        self.holder_actives[label] = not self.holder_actives[label]
+
+        if label == 'markers':
+            self.prop_ifs.holder.set_visible(self.holder_actives[label])
+
+        elif label == 'edges':
+            style = '-' if self.holder_actives[label] else ' '
+            self.prop_ifs.holder.set_linestyle(style)
+
+        elif label == 'labels':
+            self.prop_ifs.set_visible_annotations(self.holder_actives[label])
+
+        if self.canvas is not None:
+            self.canvas.draw()
 
 
 # Widgets with choice of active ifs 
@@ -189,9 +178,24 @@ class WidgetsBasic(WidgetsSimple):
 
     @property
     def prop_ifs(self):
-        return self.active_prop[0]
+        return self.active_prop
 
-    def recreate_widgets(self, # prop_ifs, 
+    def update_show_components(self, label):
+        super(WidgetsBasic, self).update_show_components(label)
+        if label == 'hide ifs':
+            if self.holder_actives[label]:
+                self.prop_ifs.holder.set_linestyle(' ')
+                self.prop_ifs.holder.set_visible(False)
+                self.prop_ifs.set_visible_annotations(False)
+                self.prop_ifs.topo_const.set_visible(False)
+            else:
+                self.prop_ifs.holder.set_linestyle(' ')
+                self.prop_ifs.holder.set_visible(True)
+                self.prop_ifs.set_visible_annotations(True)
+                self.prop_ifs.topo_const.set_visible(True)                    
+
+    # here is updated the active prop_ifs
+    def recreate_widgets(self, 
                          idx_active, props, active_prop):
         super(WidgetsBasic, self).recreate_widgets_(active_prop)
         self._recreate_active_ifs_radiobutton(idx_active, props)        
@@ -204,7 +208,7 @@ class WidgetsBasic(WidgetsSimple):
         self.rax_activeifs = plt.axes([0.2+self.button_length__+0.01, 0.05, 
                                        self.button_length__,
                                        self.button_height__], axisbg=axcolor)
-        activecolor = self.active_prop[0].get_color()
+        activecolor = self.active_prop.get_color()
         self.w_rad_active_ifs = \
                 RadioButtons(self.rax_activeifs,
                              sorted(self.colors_ifs.keys()),
@@ -216,7 +220,7 @@ class WidgetsBasic(WidgetsSimple):
 
     def colorfunc(self, label):
         idx = int(label)
-        self.active_prop[0] = self.props[idx]
+        self.active_prop = self.props[idx]
         self.w_rad_active_ifs.activecolor = self.prop_ifs.get_color()
         self._recreate_radius_slider()
         self._recreate_show_lines_check_button()
