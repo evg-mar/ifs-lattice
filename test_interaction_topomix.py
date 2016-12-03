@@ -457,12 +457,12 @@ if __name__ == '__main__':
     axlines = {ax_01:[PropertiesIFSTopo(label='ifs01_ax01', holder=line2d1_01,
                                         topo_const=topo_c0101) #,
 #                      PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02,
-#                                        topo_const=topo_c0102)
+#                                        topo_const_triang=topo_c0102)
                         ],
                ax02:[PropertiesIFSTopo(label='ifs01_ax02', holder=line2d2_01,
                                         topo_const=topo_c0201) #,
 #                      PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02,
-#                                        topo_const=topo_c0102)
+#                                        topo_const_triang=topo_c0102)
                         ]
                }
 

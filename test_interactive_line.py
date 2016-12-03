@@ -26,7 +26,7 @@ class TriangularInteractor(object):
     
     slider_length__ = 0.1
     slider_hight__  = 0.015
-    
+
     button_length__ = 0.1
     button_height__ = 0.1
 

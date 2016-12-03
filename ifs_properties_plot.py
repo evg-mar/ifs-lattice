@@ -263,11 +263,15 @@ import ifs_operators_plot as oper
 import matplotlib.pyplot as plt 
 
 class TopoConst(object):
-    def __init__(self, ax, alpha, beta, gamma):
+    def __init__(self, ax, alpha, beta, gamma, companion=None):
+        
+        self.companion = companion
+        
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
 
+        self.axes = ax
         self.alpha2dline, = ax.plot([alpha]*3,
                                   [0.0, beta,  1-alpha],
                                   color='r')
@@ -278,13 +282,13 @@ class TopoConst(object):
 
 #         self.set_animated(True)
 
-#         self.update_const(ax, alpha, beta)
+#         self.set_topoconst(ax, alpha, beta)
 
     def set_animated(self,value):
         self.alpha2dline.set_animated(value)
         self.beta2dline.set_animated(value)
         
-    def update_const(self, ax, alpha, beta):
+    def set_topoconst(self, alpha, beta):
         self.alpha = alpha
         self.beta = beta
         
@@ -293,9 +297,9 @@ class TopoConst(object):
         self.beta2dline.set_data([0.0, alpha, 1 - beta],
                                   [beta]*3)
 
-    def draw_topo_object(self, ax):
-        ax.draw_artist(self.alpha2dline)
-        ax.draw_artist(self.beta2dline)
+    def draw_topo_object(self):
+        self.axes.draw_artist(self.alpha2dline)
+        self.axes.draw_artist(self.beta2dline)
         
     def set_visible(self, flag):
         self.alpha2dline.set_visible(flag)
@@ -304,6 +308,127 @@ class TopoConst(object):
     def get_visible(self):
         return self.alpha2dline.get_visible() and \
                self.beta2dline.get_visible()
+
+
+class TopoConstInteractive(TopoConst):
+    
+    def __init__(self, ax, alpha, beta, gamma, companion=None):
+        super(self.__class__, self).__init__(ax, alpha, beta, gamma)
+        self.companion = companion
+        self.active_artist = None
+ 
+    def connect(self):
+        'connect to all the events we need'
+        canvas = self.axes.figure.canvas
+        self.cidpick = canvas.mpl_connect('pick_event',
+                                          self.on_pick)
+        
+#         self.cidpress = canvas.mpl_connect('button_press_event',
+#                                            self.on_press)
+#         self.ciddraw = self.rect.figure.canvas.mpl_connect(
+#             'draw_event', self.draw_callback)
+        self.cidrelease = canvas.mpl_connect('button_release_event',
+                                             self.on_release)
+        self.cidmotion = canvas.mpl_connect('motion_notify_event',
+                                            self.on_motion)
+
+
+    def on_pick(self, event):
+        print("on pick..", event.artist)
+
+        if event.artist not in [self.alpha2dline, self.beta2dline]:
+            return
+        if self.active_artist is not None:
+            return
+
+        self.active_artist = event.artist
+
+        self.active_artist.set_animated(True)
+
+        
+        canvas = self.axes.figure.canvas
+        canvas.draw()
+
+        self.background = canvas.copy_from_bbox(self.axes.figure.bbox)
+        # now redraw just the rectangle
+        self.axes.draw_artist(self.active_artist)
+
+        # and blit just the redrawn area
+        canvas.blit(self.axes.bbox)
+        
+        if self.companion is not None:                
+            self.companion.set_animated(True)
+#             self.companion.background = \
+#                 canvas.copy_from_bbox(self.companion.rect.axes.figure.bbox)
+            self.companion.draw_blit()
+                    
+##################
+    def on_motion(self, event):
+        'on motion we will move the rect if the mouse is over us'
+#         if HolderCircle.lock is not self:
+#             return
+#         print("in motion...")
+#         print(HolderCircle.lock)
+        if event.inaxes != self.axes:
+            return
+        if self.active_artist != event.artist:
+            return
+#         if (HolderCircle.lock is None) or (HolderCircle.idx is None):
+#             return
+# 
+#         obj = HolderCircle.lock
+
+        self.set_topoconst(event.xdata, event.ydata)
+#         obj.set_munu((event.xdata, event.ydata))
+#         print('animated in motion...: ', obj.get_animated(), obj.annotation.get_animated())
+#         print(obj)
+#
+
+        canvas = self.axes.figure.canvas
+#         canvas = self.companion.rect.figure.canvas
+        canvas.restore_region(self.background)
+        self.axes.draw_artist(self.active_artist)
+        canvas.blit(self.axes.bbox)
+
+        if self.companion is not None:
+            self.companion.set_munu((event.xdata, event.ydata))
+            self.companion.draw_object()
+            canvas.blit(self.companion.rect.axes.bbox)
+
+
+    def draw_blit(self, obj):          
+        obj.draw_on(self.axes)
+        self.axes.figure.canvas.blit(self.axes.bbox)
+
+
+    def on_release(self, event):
+        'on release we reset the press data'
+        if event.inaxes != self.axes:
+            return
+#         if (HolderCircle.lock is None) or (HolderCircle.idx is None):
+#             return
+        
+#         if self.companions is not None:
+#             companion = self.companions[HolderCircle.idx]
+#             print(HolderCircle.lock)
+# #             print(HolderCircle.lock.get_munu)
+#             mu, nu = HolderCircle.lock.get_munu()
+#             companion.set_munu(mu,nu)
+
+        # turn off the rect animation property and reset the background
+        self.active_artist.set_animated(False)
+        
+        
+        self.background = None
+        
+        if self.companion is not None:
+            self.companion.set_animated(False)
+            self.companion.background = None
+            self.companion = None
+        # redraw the full figure
+        self.axes.figure.canvas.draw()
+
+####################
 
 
 
@@ -338,12 +463,12 @@ class PropertiesIFSTopo(PropertiesIFS):
 #         self.idx_active = None
 
 
-    def update_topo_const(self, ax, alpha, beta):
-        self.topo_const.update_const(ax, alpha, beta)
+    def update_topo_const(self, alpha, beta):
+        self.topo_const.set_topoconst(alpha, beta)
 
 #     def draw_holder_annotations(self, ax):
 #         super(PropertiesIFSTopo, self).draw_holder_annotations(ax)
-#         self.topo_const.draw_topo_object(ax)  
+#         self.topo_const_triang.draw_topo_object(ax)  
 
     def incGeneral(self):
         return oper.incGeneral(self.get_data_pair(),
@@ -480,7 +605,7 @@ class PropertiesIFSTopoInteractive(PropertiesIFSTopo):
         if self.idx_active > -1:
             self.draw_holder_annotations(self.axes)
         else:
-            self.topo_const.draw_topo_object(self.axes)
+            self.topo_const.draw_topo_object()
 #             
 #             axes.draw_artist(self.rect_mu)
 #             axes.draw_artist(self.rect_nu)
@@ -555,11 +680,9 @@ class PropertiesIFSTopoInteractive(PropertiesIFSTopo):
             self.draw_holder_annotations(self.axes)
         
         elif self.idx_active == -1:
-            self.update_topo_const(self.axes, xdata, ydata)
-#                 prop_ifs_inactive.update_topo_const(ax_inactive,
-#                                                     xdata, ydata)
+            self.update_topo_const(xdata, ydata)
             self.axes.figure.canvas.restore_region(self.background)
-            self.topo_const.draw_topo_object(self.axes)        
+            self.topo_const.draw_topo_object()        
 
         self.axes.figure.canvas.blit(self.axes.bbox)
 

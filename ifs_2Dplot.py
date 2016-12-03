@@ -202,7 +202,10 @@ def plot_triangle(rang, ax, plottyp='-', color='k', linewidth=1.5):
 #     ax.set_xticks(np.arange(min_, max_+1, 1))
 #     ax.set_yticks(np.arange(min_, max_+1, 1))
     
-    ax.plot(x_triang, y_triang, plottyp, linewidth=linewidth, color=color)
+    ax.plot(x_triang, y_triang,
+            plottyp, linewidth=linewidth, color=color, 
+            label='_nolegend_',
+            )
 
 
 def plot_triangular_(ax,

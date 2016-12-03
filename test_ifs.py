@@ -29,7 +29,12 @@ def main():
 #     
  
     ifs01 = IFS.random(universe, 1, randseed=2)
-
+    id,mu,nu,_ = ifs01.elements_split()
+  
+    import pandas as pd
+    df = pd.DataFrame({'label':id,'mu':mu, 'nu':nu}, index=id)
+    df.to_csv('/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/ifs_holder.csv')
+    
     plot_ifs(ifs01, typ="interval_valued")
     plot_stack(ifs01)
     plot_bar_intValued(ifs01)

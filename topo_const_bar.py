@@ -3,23 +3,24 @@
 from matplotlib.patches import Rectangle
 
 
-class RectangleBasic(object):
+class TopoConstBar(object):
 
-    def __init__(self, rect_big, mu, nu, 
-                 colmu=None, colnu=None,
-                 companion=None, prop_triang=None):
+    def __init__(self, axes, end, alpha, beta, gamma, 
+                 coloralpha=None, colorbeta=None):
+        
+        self.axes = axes
+        self.alpha = alpha
+        self.beta  = beta
+        self.gamma = gamma
 
-        self.companion = companion
-        self.prop_triang = prop_triang
-
-        self.rect = rect_big
-#         self.rect.axes.set_ylim([0,1])
 
         x, y = rect_big.get_xy()
         height = rect_big.get_height()
         width  = rect_big.get_width()
 
-        colmu = "blue" if colmu is None else colmu
+        coloralpha = "blue" if coloralpha is None else coloralpha
+        
+        
         self.rect_mu = Rectangle((x,y), width, mu, facecolor=colmu)
         self.rect.axes.add_patch(self.rect_mu)
 
@@ -33,7 +34,7 @@ class RectangleBasic(object):
         self.background = None
 
 
-class EditableRectangle(RectangleBasic):
+class TopoConstBar(TopoConstBar):
     lock = None # only one can be animated at a time
     
     def get_idx(self):
