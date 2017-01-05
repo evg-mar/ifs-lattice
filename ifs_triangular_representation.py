@@ -1,5 +1,6 @@
 from editable_circle import HolderCircle
-from ifs_properties_plot import TopoConst, TopoConstInteractive
+# from ifs_properties_plot import TopoConst, TopoConstInteractive
+from topo_const_triang import TopoConstTriangInteractive
 
 import abc
 
@@ -39,7 +40,6 @@ class IfsTriang(IfsTriangAbstract):
     def __init__(self, axes, musnus,
                        radius=0.01,
                        labels=None,
-                       companions=None,
                        picker=10,
                        alpha_marker=0.5, 
                        visible=True,
@@ -48,14 +48,10 @@ class IfsTriang(IfsTriangAbstract):
                        colors = {'mu':'b', 'nu':'g', 'elem':'r'},
                        bins = {'mu':10, 'nu':10}
                        ):
-
+        print("in ifs triang...")
         self.axes = axes
         self.labels = labels if (labels is not None) \
                              else list(range(len(musnus[0])))
-
-        self.companions = companions
-        self.companion = None
-
 
         rang = 1
 #         rotation=None
@@ -97,6 +93,33 @@ class IfsTriang(IfsTriangAbstract):
 
 
 class IfsTriangInteractive(IfsTriang):
+    def __init__(self,axes, musnus,
+                       radius=0.01,
+                       companions=None,
+                       labels=None,
+                       picker=10,
+                       alpha_marker=0.5, 
+                       visible=True,
+                       annotation_size=12,
+                       show_annotation=True,
+                       colors = {'mu':'b', 'nu':'g', 'elem':'r'},
+                       bins = {'mu':10, 'nu':10}
+                       ):
+        super(IfsTriangInteractive, self).__init__(axes, musnus,
+                                                   radius,
+                                                   labels,
+                                                   picker,
+                                                   alpha_marker,
+                                                   visible,
+                                                   annotation_size,
+                                                   show_annotation,
+                                                   colors,
+                                                   bins)
+
+
+        self.companions = companions
+        self.companion = None
+
 
     def connect(self):
         'connect to all the events we need'
@@ -132,7 +155,7 @@ class IfsTriangInteractive(IfsTriang):
 
         self.background = canvas.copy_from_bbox(self.axes.figure.bbox)
         # now redraw just the rectangle
-        event.artist.draw_on(self.axes)
+        event.artist.draw_object()
 
         # and blit just the redrawn area
         canvas.blit(self.axes.bbox)
@@ -141,7 +164,7 @@ class IfsTriangInteractive(IfsTriang):
             self.companion = self.companions[HolderCircle.idx]
             self.companion.set_animated(True)
             self.companion.background = \
-                canvas.copy_from_bbox(self.companion.rect.axes.figure.bbox)
+                canvas.copy_from_bbox(self.companion.axes.figure.bbox)
             self.companion.draw_blit()
                     
         
@@ -171,12 +194,12 @@ class IfsTriangInteractive(IfsTriang):
             self.companion.draw_object()
             canvas.blit(self.companion.rect.axes.bbox)
 
-        obj.draw_on(self.axes)
+        obj.draw_object()
         canvas.blit(self.axes.bbox)
 
 
     def draw_blit(self, obj):          
-        obj.draw_on(self.axes)
+        obj.draw_object()
         self.axes.figure.canvas.blit(self.axes.bbox)
 
 
@@ -202,8 +225,42 @@ class IfsTriangInteractive(IfsTriang):
         self.axes.figure.canvas.draw()
 
         
+class IfsTriangTopoConstInteractive(IfsTriangInteractive):
+    def __init__(self,axes, musnus,
+                       topo_const_triang,
+                       radius=0.01,
+                       companions=None,
+#                        companion_topo_const=None,
+                       labels=None,
+                       picker=10,
+                       alpha_marker=0.5, 
+                       visible=True,
+                       annotation_size=12,
+                       show_annotation=True,
+                       colors = {'mu':'b', 'nu':'g', 'elem':'r'},
+                       bins = {'mu':10, 'nu':10}                 
+                 ):
+        super(IfsTriangTopoConstInteractive, self).__init__(axes, musnus,
+                       radius,
+                       companions,
+                       labels,
+                       picker,
+                       alpha_marker, 
+                       visible,
+                       annotation_size,
+                       show_annotation,
+                       colors,
+                       bins)
+        self.topo_const_triang = topo_const_triang
+#         self.companion_topo_const = companion_topo_const
+        
+    def connect(self):
+        super(IfsTriangTopoConstInteractive, self).connect()
+        self.topo_const_triang.connect()
+#         if self.companion_topo_const is not None:
+#             self.companion_topo_const.connect()
 
-   
+
 if __name__ == '__main__':
 
     from universal_set import UniversalSet
@@ -229,18 +286,19 @@ if __name__ == '__main__':
 #                                     mus, nus, ifs01.get_range(), bins=19,
 #                                     rotation={'x':45, 'y':0})
 
-
-
-    
 #     fig = plt.figure()
 #     ax = fig.add_subplot(111)
     # rects = ax.bar(range(10), [1]*10)
 #     circ = HolderCircle(ax, (0.1,0.6), label='tuka')
-    prop = IfsTriang(ax, ([0.1, 0.4, 0.6], [0.6, 0.4, 0.4]),
-                                radius=.01)
-    
-    topoconst = TopoConstInteractive(ax, 0.6, 0.2, 0.5)
-    topoconst.connect()
+#     prop = IfsTriang(ax, ([0.1, 0.4, 0.6], [0.6, 0.4, 0.4]),
+#                                 radius=.01)
+
+    topoconst = TopoConstTriangInteractive(ax, 0.6, 0.2, 0.5)
+
+    ifs_topoconst = IfsTriangTopoConstInteractive(ax, (mus,nus), topoconst)
+    ifs_topoconst.connect()
+#     ifstriang_topoconst = IfsTriangInteractive(ax, (mus,nus))
+#     ifstriang_topoconst.connect()
 #     prop.connect()
      
 #     prop = IfsTriangInteractive(ax, ([0.1, 0.4, 0.6], [0.6, 0.4, 0.4]),

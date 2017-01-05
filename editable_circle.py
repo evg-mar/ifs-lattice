@@ -28,6 +28,10 @@ class HolderCircle(Circle):
             self.create_annotation(annotation_size, self._label)
 
         self.active_objects = {self.annotation: True}
+        
+        self.background = \
+            self.axes.figure.canvas.copy_from_bbox(self.axes.figure.bbox)
+
     
     
     def __str__(self):
@@ -48,11 +52,11 @@ class HolderCircle(Circle):
                                      self.center,
                                      fontsize='medium') #, zorder=10)
 
-    def draw_on(self, axes):
+    def draw_object(self):
         self.axes.draw_artist(self)
         for obj, active_flag in self.active_objects.items():
             if active_flag:
-                axes.draw_artist(obj)
+                self.axes.draw_artist(obj)
 
     def add_object(self, axes):
         self.axes.add_patch(self)
@@ -90,6 +94,9 @@ class HolderCircle(Circle):
             print('has annotation...')
             ann = self.annotation
             ann.xy = ann.xyann = ann.xytext = self.center
+            
+    def set_data(self, mu, nu):
+        self.set_munu((mu, nu))
             
     @property
     def get_text(self):

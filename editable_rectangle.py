@@ -6,35 +6,45 @@ from matplotlib.patches import Rectangle
 class RectangleBasic(object):
 
     def __init__(self, rect_big, mu, nu, 
-                 colmu=None, colnu=None,
-                 companion=None, prop_triang=None):
-
-        self.companion = companion
-        self.prop_triang = prop_triang
-
+                 color_mu=None, color_nu=None):
+        
         self.rect = rect_big
+        self.axes = self.rect.axes
 #         self.rect.axes.set_ylim([0,1])
 
         x, y = rect_big.get_xy()
         height = rect_big.get_height()
         width  = rect_big.get_width()
 
-        colmu = "blue" if colmu is None else colmu
-        self.rect_mu = Rectangle((x,y), width, mu, facecolor=colmu)
-        self.rect.axes.add_patch(self.rect_mu)
+        color_mu = "blue" if color_mu is None else color_mu
+        self.rect_mu = Rectangle((x,y), width, mu, facecolor=color_mu)
+        self.axes.add_patch(self.rect_mu)
 
-        colnu = "green" if colnu is None else colnu
-        self.rect_nu = Rectangle((x,height - nu), width, nu, facecolor=colnu)
+        color_nu = "green" if color_nu is None else color_nu
+        self.rect_nu = Rectangle((x,height - nu), width, nu, facecolor=color_nu)
         self.rect.axes.add_patch(self.rect_nu)
-
-        self.press_xy = None
-        self.mu_data = None
-        self.nu_data = None
-        self.background = None
 
 
 class EditableRectangle(RectangleBasic):
     lock = None # only one can be animated at a time
+    
+    def __init__(self, rect_big, mu, nu, 
+                 color_mu=None, color_nu=None,
+                 companion=None, prop_triang=None):
+        super(EditableRectangle, self).__init__(rect_big, mu, nu,
+                                             color_mu, color_nu)
+
+        self.companion = companion
+        self.prop_triang = prop_triang
+
+        self.press_xy = None
+        self.mu_data = None
+        self.nu_data = None
+        
+        self.background = \
+            self.rect.figure.canvas.copy_from_bbox(self.axes.figure.bbox)
+
+
     
     def get_idx(self):
         return self.rect.get_x()
@@ -63,6 +73,9 @@ class EditableRectangle(RectangleBasic):
     def set_munu(self, munu):
         self.set_mu(munu[0])
         self.set_nu(munu[1])
+        
+    def set_data(self, mu, nu):
+        self.set_munu((mu, nu))
 
     def set_animated(self, value):
         self.rect_mu.set_animated(value)
@@ -116,12 +129,14 @@ class EditableRectangle(RectangleBasic):
         self.set_animated(True)
         
         if self.companion is not None:
+            print("companion of rectangle set animated True")
+#             self.companion.background = \
+#                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
             self.companion.set_animated(True)
      
-        canvas.draw()
+        canvas.draw()        
         
-        
-        self.background = canvas.copy_from_bbox(self.rect.axes.figure.bbox)
+        self.background = canvas.copy_from_bbox(self.axes.figure.bbox)
         
         # now redraw just the rectangle
         axes.draw_artist(self.rect_mu)
@@ -130,7 +145,9 @@ class EditableRectangle(RectangleBasic):
         canvas.blit(axes.bbox)
 
         if self.companion is not None:
-            self.prop_triang.background = \
+#             self.prop_triang.background = \
+#                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
+            self.companion.background = \
                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
             self.update_companion()
 #         self.prop_triang.draw_blit(self.companion)
@@ -147,11 +164,13 @@ class EditableRectangle(RectangleBasic):
         self.background = canvas.copy_from_bbox(self.rect.axes.figure.bbox)
 
     def update_companion(self):
-        self.companion.set_mu(self.rect_mu.get_height())
-        self.companion.set_nu(1-self.rect_nu.get_y())
+#         self.companion.set_mu(self.rect_mu.get_height())
+#         self.companion.set_nu(1-self.rect_nu.get_y())
+        self.companion.set_data(self.rect_mu.get_height(),
+                                1-self.rect_nu.get_y())
 #         self.prop_triang.draw_blit(self.companion)
-        self.companion.draw_on(self.prop_triang.axes)
-        self.prop_triang.axes.figure.canvas.blit(self.prop_triang.axes.bbox)
+        self.companion.draw_object()
+        self.companion.axes.figure.canvas.blit(self.companion.axes.bbox)
 
 
     def update_nu(self, event):
@@ -160,12 +179,14 @@ class EditableRectangle(RectangleBasic):
 
         nu_y, nu_height = self.nu_data
         nu_y = max(min(1.0, nu_y + dy), 0.0)
-        self.rect_nu.set_y(nu_y)
-        self.rect_nu.set_height(self.rect.get_height() - nu_y)
+#         self.rect_nu.set_y(nu_y)
+#         self.rect_nu.set_height(self.rect.get_height() - nu_y)
+        self.set_nu(self.rect.get_height() - nu_y)
 
         mu_height = self.rect_mu.get_height()
         if mu_height > nu_y:
-            self.rect_mu.set_height(nu_y)
+            self.set_mu(nu_y)
+#             self.rect_mu.set_height(nu_y)
 
 
     def update_mu(self, event):
@@ -173,14 +194,15 @@ class EditableRectangle(RectangleBasic):
         dy = event.ydata - ypress
 
         mu_y, mu_height = self.mu_data
-        self.rect_mu.set_height(min(max(0.0, mu_height + dy),
-                                    self.rect.get_height()))
+        self.set_mu(min(max(0.0, mu_height + dy),
+                        self.rect.get_height()))
 
         nu_y = self.rect_nu.get_y()
         mu_height = self.rect_mu.get_height()   
         if mu_height > nu_y:
-            self.rect_nu.set_y(mu_height)
-            self.rect_nu.set_height(self.rect.get_height() - mu_height)
+            self.set_nu(self.rect.get_height() - mu_height)
+#             self.rect_nu.set_y(mu_height)
+#             self.rect_nu.set_height(self.rect.get_height() - mu_height)
 
         
     def update_pi(self, event):
@@ -189,17 +211,21 @@ class EditableRectangle(RectangleBasic):
         dy = event.ydata - ypress
 
         mu_y, mu_height = self.mu_data
-        self.rect_mu.set_height(max(0.0, mu_height + dy))
+        self.set_mu(max(0.0, mu_height + dy))
+#         self.rect_mu.set_height(max(0.0, mu_height + dy))
         
         nu_y, nu_height = self.nu_data
-        self.rect_nu.set_y(min(1.0, nu_y + dy))
-        self.rect_nu.set_height(max(0.0, nu_height - dy))
+
+#         self.rect_nu.set_y(min(1.0, nu_y + dy))
+        self.set_nu(max(0.0, nu_height - dy))
+#         self.rect_nu.set_height(max(0.0, nu_height - dy))
+
 
     def on_motion(self, event):
         'on motion we will move the rect if the mouse is over us'
         if EditableRectangle.lock is not self:
             return
-        if event.inaxes != self.rect.axes:
+        if event.inaxes != self.axes:
             return
 
         if self.update_flag == "update_pi":
@@ -214,15 +240,15 @@ class EditableRectangle(RectangleBasic):
         canvas.restore_region(self.background)
         self.draw_object()
         # blit just the redrawn area
-        canvas.blit(self.rect.axes.bbox)
+        canvas.blit(self.axes.bbox)
 
         if self.companion is not None:
+            canvas.restore_region(self.companion.background)
             self.update_companion()
 
         
     def draw_blit(self):
         canvas = self.rect.figure.canvas
-        axes = self.rect.axes
         # restore the background region
         canvas.restore_region(self.background)
 
@@ -230,12 +256,11 @@ class EditableRectangle(RectangleBasic):
         self.draw_object()
 
         # blit just the redrawn area
-        canvas.blit(axes.bbox)
+        canvas.blit(self.axes.bbox)
      
     def draw_object(self):
-        axes = self.rect.axes
-        axes.draw_artist(self.rect_mu)
-        axes.draw_artist(self.rect_nu)      
+        self.axes.draw_artist(self.rect_mu)
+        self.axes.draw_artist(self.rect_nu)      
            
 
     def on_release(self, event):
@@ -253,8 +278,8 @@ class EditableRectangle(RectangleBasic):
 
         if self.companion is not None:
             self.companion.set_animated(False)
-            self.companion.background = None
-            self.background = None
+#             self.companion.background = None
+#             self.background = None
 
         # redraw the full figure
         self.rect.figure.canvas.draw()

@@ -42,16 +42,21 @@ class TopoConst(object):
                self.beta2dline.get_visible()
 
 
-class TopoConstInteractive(TopoConst):
+class TopoConstTriangInteractive(TopoConst):
     
     def __init__(self, ax, alpha, beta, gamma, companion=None):
-        super(self.__class__, self).__init__(ax, alpha, beta, gamma)
+        super(TopoConstTriangInteractive, self).__init__(ax, alpha, beta, gamma)
         self.companion = companion
         self.active_artists = []
         
         self.alpha2dline.set_picker(5)
         self.beta2dline.set_picker(5)
+        
+        self.background = self.axes.figure.canvas.copy_from_bbox(
+                                                        self.axes.figure.bbox)
 
+#     def set_all_active(self):
+#         self.active_artists = [self.alpha2d]
 
     def connect(self):
         'connect to all the events we need'
@@ -68,6 +73,18 @@ class TopoConstInteractive(TopoConst):
         self.cidmotion = canvas.mpl_connect('motion_notify_event',
                                             self.on_motion)
 
+    def set_data(self, alpha, beta):
+#         if self.alpha2dline in self.active_artists:
+        self.alpha = alpha
+        self.alpha2dline.set_data([alpha]*3,
+                                  [0.0, beta,  1-alpha])
+#         if self.beta2dline in self.active_artists:
+        self.beta = beta
+        self.beta2dline.set_data([0.0, alpha, 1 - beta],
+                                 [beta]*3)
+
+    
+    
     def set_topoconst_active(self, alpha, beta):
         if self.alpha2dline in self.active_artists:
             self.alpha = alpha
@@ -86,7 +103,13 @@ class TopoConstInteractive(TopoConst):
     def draw_active_artists(self):
         for a in self.active_artists:
             self.axes.draw_artist(a)
-
+    
+    def draw_all(self):
+        self.axes.draw_artist(self.alpha2dline)
+        self.axes.draw_artist(self.beta2dline)
+        
+    def draw_object(self):
+        self.draw_all()
             
     def on_pick(self, event):
 
@@ -114,9 +137,11 @@ class TopoConstInteractive(TopoConst):
         # and blit just the redrawn area
         canvas.blit(self.axes.bbox)
         
+        print("companion:", id(self.companion))
         if self.companion is not None:                
+            print("companion...")
             self.companion.set_animated(True)
-
+            canvas.draw()
             self.companion.draw_blit()
 
 
@@ -126,6 +151,10 @@ class TopoConstInteractive(TopoConst):
         if event.inaxes != self.axes:
             return
         if len(self.active_artists) == 0:
+            return
+
+        x, y = event.xdata, event.ydata
+        if x <= 0 or y <= 0 or x + y >= 1:
             return
 
         self.set_topoconst_active(event.xdata, event.ydata)
@@ -138,13 +167,14 @@ class TopoConstInteractive(TopoConst):
         canvas.blit(self.axes.bbox)
 
         if self.companion is not None:
+            print("update topo const bar....")
             self.companion.set_munu((event.xdata, event.ydata))
             self.companion.draw_object()
-            canvas.blit(self.companion.rect.axes.bbox)
+            canvas.blit(self.companion. axes.bbox)
 
 
     def draw_blit(self, obj):          
-        obj.draw_on(self.axes)
+        obj.draw_object(self.axes)
         self.axes.figure.canvas.blit(self.axes.bbox)
 
 
@@ -159,14 +189,21 @@ class TopoConstInteractive(TopoConst):
         self.set_animated_active_artists(False)
         self.active_artists = []
         
-        self.background = None
+#         self.background = None
         
         if self.companion is not None:
             self.companion.set_animated(False)
-            self.companion.background = None
-            self.companion = None
+#             self.companion.background = None
+#             self.companion = None
         # redraw the full figure
         self.axes.figure.canvas.draw()
+        
+###########################################################
+
+
+# class GammaTopoConstTriangInteractive(TopoConstTriangInteractive):
+    
+
 
 ####################
 if __name__ == '__main__':
@@ -205,7 +242,7 @@ if __name__ == '__main__':
 #     prop = IfsTriang(ax, ([0.1, 0.4, 0.6], [0.6, 0.4, 0.4]),
 #                                 radius=.01)
 #     
-    topoconst = TopoConstInteractive(ax, 0.6, 0.2, 0.5)
+    topoconst = TopoConstTriangInteractive(ax, 0.6, 0.2, 0.5)
     topoconst.connect()
 #     prop.connect()
      

@@ -33,7 +33,11 @@ def main():
   
     import pandas as pd
     df = pd.DataFrame({'label':id,'mu':mu, 'nu':nu}, index=id)
-    df.to_csv('/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/ifs_holder.csv')
+    print(df.columns)
+    df.to_csv('/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/ifs_holder.csv',
+              index=True,
+              index_col='id',
+              header=True)
     
     plot_ifs(ifs01, typ="interval_valued")
     plot_stack(ifs01)

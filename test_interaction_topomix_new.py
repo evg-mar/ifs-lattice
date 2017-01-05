@@ -1,13 +1,15 @@
 import numpy as np
 from matplotlib.lines import Line2D
 
-
+from topo_const_triang import TopoConstTriangInteractive
 from ifs_properties_plot import PropertiesIFSTopo,\
-     PropertiesIFSTopoInteractive, TopoConst
+     PropertiesIFSTopoInteractive, TopoConst, TopoConstInteractive
 
-from ifs_bar_representation import IfsBar
+from ifs_bar_representation import IfsBar, IfsBarTopoConst
 from editable_rectangle import EditableRectangle
-from ifs_triangular_representation import IfsTriangInteractive
+from ifs_triangular_representation import IfsTriangInteractive,\
+    IfsTriangTopoConstInteractive
+from topo_const_bar import TopoConstBarInteractive
 
 from widgets_basic import WidgetsSimple
 
@@ -50,7 +52,7 @@ if __name__ == "__main__":
 
     indices, mus, nus, pis = ifs01.elements_split()
 
-    ax = plt.subplot2grid((4,6), (0,0), rowspan=3, colspan=3)
+    axes01 = plt.subplot2grid((4,6), (0,0), rowspan=3, colspan=3)
 
 ##################
 
@@ -63,19 +65,40 @@ if __name__ == "__main__":
 #     topo_c0101 = TopoConst(ax_01, 0.7, 0.2, 0.5)
     ax02.set_ylim([0,1])
     ax02.set_aspect(aspect='auto', adjustable='datalim')
-    prop_bar = IfsBar(EditableRectangle, "prop_bar01", mus, nus, ax02)
-#     prop_triang = PropertiesTriang()
-#     prop_bar.connect()
-#     prop_triang = PropertiesIFSTopoInteractive(label='ifs01_ax01', holder=line2d1_01,
-#                                         topo_const_triang=topo_c0101)
-#     
-    ax.set_aspect('equal', 'datalim')
-    prop_triang = IfsTriangInteractive(ax, (mus, nus),radius=.01, 
-                                       companions=prop_bar.editable_rects)
+#     prop_bar = IfsBar("editable rects",
+#                       EditableRectangle, 
+#                       (mus,nus), 
+#                       ax02)
+    alpha_beta = (0.3, 0.5)
+    prop_bar = IfsBarTopoConst("editable rects",
+                      EditableRectangle, 
+                      musnus=(mus,nus),
+                      topo_const_type=TopoConstBarInteractive,
+                      alpha_beta=alpha_beta, 
+                      axes=ax02)
+    prop_bar.connect()
+
+#     axes01.set_aspect('equal', 'datalim')
+#     prop_triang = IfsTriangInteractive(axes01, (mus, nus),radius=.01,
+#                                        companions=prop_bar.editable_rects)
+    
+    topoconst = TopoConstTriangInteractive(axes01, 0.6, 0.2, 0.5)
+    topoconst.companion = prop_bar.topo_const_bar
+    prop_bar.topo_const_bar.companion = topoconst
+    axes01.set_aspect('equal', 'datalim')
+    prop_triang = IfsTriangTopoConstInteractive(axes01, (mus, nus),
+                                   topo_const_triang=topoconst,             
+                                   radius=.01,
+                                   companions=prop_bar.editable_rects)
+#                                    companion_topo_const=prop_bar.topo_const_bar)
 
     for er, companion in zip(prop_bar.editable_rects, prop_triang.holder):
         er.companion = companion
         er.prop_triang = prop_triang
+#     prop_bar.companion_topo_const = prop_triang.topo_const_triang
+        
+#     prop_bar.
+        
     
     interaction = InteractorBasic(prop_triang, prop_bar)
 
