@@ -30,12 +30,11 @@ class EditableRectangle(RectangleBasic):
     
     def __init__(self, rect_big, mu, nu, 
                  color_mu=None, color_nu=None,
-                 companion=None, prop_triang=None):
+                 companion=None):
         super(EditableRectangle, self).__init__(rect_big, mu, nu,
                                              color_mu, color_nu)
 
         self.companion = companion
-        self.prop_triang = prop_triang
 
         self.press_xy = None
         self.mu_data = None
@@ -145,12 +144,9 @@ class EditableRectangle(RectangleBasic):
         canvas.blit(axes.bbox)
 
         if self.companion is not None:
-#             self.prop_triang.background = \
-#                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
             self.companion.background = \
                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
             self.update_companion()
-#         self.prop_triang.draw_blit(self.companion)
 
 
     def draw_callback(self, event):
@@ -168,7 +164,7 @@ class EditableRectangle(RectangleBasic):
 #         self.companion.set_nu(1-self.rect_nu.get_y())
         self.companion.set_data(self.rect_mu.get_height(),
                                 1-self.rect_nu.get_y())
-#         self.prop_triang.draw_blit(self.companion)
+
         self.companion.draw_object()
         self.companion.axes.figure.canvas.blit(self.companion.axes.bbox)
 

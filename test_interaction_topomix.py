@@ -8,7 +8,7 @@ from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
 
 from ifs_properties_plot import PropertiesIFS, PropertiesIFSTopo, TopoConst
 
-from editable_rectangle import PropertiesBar
+#from editable_rectangle import PropertiesBar
 
 
 class TriangularInteractorBasic(object):
@@ -175,8 +175,8 @@ class TriangularInteractorBasic(object):
 #         print(event.inaxes)
         xy = np.asarray(prop_ifs.get_data_pair())
         print('get the index..')
-        print(prop_ifs.get_data_pair())
-        print(xy)
+        # print(prop_ifs.get_data_pair())
+        # print(xy)
         x0, y0 = xy[0], xy[1]
 
         x = np.zeros(len(x0)+1, dtype=float)

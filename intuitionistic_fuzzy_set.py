@@ -57,6 +57,9 @@ class IFS(object):
         else:
             return self._selector.get(key, STD_ZERO)
 
+    def set_bykey(self, key, value):
+        self[self._universe.get_index(key)] = value
+
     def __setitem__(self, key, value):
 
         if key in self._universe.indices():

@@ -240,8 +240,8 @@ def plot_3D_histogramm(ifs,
     
     
     ax.legend([muBinsLabel, nuBinsLabel, histBars, elemMapsLabel],
-              ['Membership degree bins', 
-               'Non-membership degree bins', 
+              ['Membership degree grid', 
+               'Non-membership degree grid', 
                "Histogram bars",
                "Map of the elements from the Universe"],
               numpoints = 2)

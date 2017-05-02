@@ -49,6 +49,7 @@ class IfsTriang(IfsTriangAbstract):
                        bins = {'mu':10, 'nu':10}
                        ):
         print("in ifs triang...")
+                
         self.axes = axes
         self.labels = labels if (labels is not None) \
                              else list(range(len(musnus[0])))
@@ -116,9 +117,11 @@ class IfsTriangInteractive(IfsTriang):
                                                    colors,
                                                    bins)
 
+        self.activeCircle = None
 
         self.companions = companions
         self.companion = None
+        self.companion_elements = None
 
 
     def connect(self):
@@ -143,10 +146,11 @@ class IfsTriangInteractive(IfsTriang):
         print("on pick..", event.artist)
         if not isinstance(event.artist, HolderCircle):
             return
-        if HolderCircle.lock is not None:
+        if self.activeCircle is not None:
             return
-        HolderCircle.lock = event.artist
-        HolderCircle.idx  = self.holder.index(event.artist)
+        self.activeCircle = event.artist
+        # HolderCircle.lock = event.artist
+        self.activeCircle.idx  = self.holder.index(event.artist)
         
         event.artist.set_animated(True)
 
@@ -161,7 +165,11 @@ class IfsTriangInteractive(IfsTriang):
         canvas.blit(self.axes.bbox)
 
         if self.companions is not None:                
-            self.companion = self.companions[HolderCircle.idx]
+            
+            #self.companion_elements = []
+            #for self.companions
+            
+            self.companion = self.companions[self.activeCircle.idx]
             self.companion.set_animated(True)
             self.companion.background = \
                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
@@ -176,10 +184,10 @@ class IfsTriangInteractive(IfsTriang):
 #         print(HolderCircle.lock)
         if event.inaxes != self.axes:
             return
-        if (HolderCircle.lock is None) or (HolderCircle.idx is None):
+        if (self.activeCircle is None) or (self.activeCircle.idx is None):
             return
 
-        obj = HolderCircle.lock
+        obj = self.activeCircle
         obj.set_munu((event.xdata, event.ydata))
         print('animated in motion...: ', obj.get_animated(), obj.annotation.get_animated())
         print(obj)
@@ -192,7 +200,7 @@ class IfsTriangInteractive(IfsTriang):
         if self.companions is not None:
             self.companion.set_munu((event.xdata, event.ydata))
             self.companion.draw_object()
-            canvas.blit(self.companion.rect.axes.bbox)
+            canvas.blit(self.companion.axes.bbox)
 
         obj.draw_object()
         canvas.blit(self.axes.bbox)
@@ -208,12 +216,12 @@ class IfsTriangInteractive(IfsTriang):
         print('on release')
         if event.inaxes != self.axes:
             return
-        if (HolderCircle.lock is None) or (HolderCircle.idx is None):
+        if (self.activeCircle is None): # or (self.activeCircle.idx is None):
             return
 
         # turn off the rect animation property and reset the background
-        HolderCircle.lock.set_animated(False)
-        HolderCircle.lock = HolderCircle.idx = None
+        self.activeCircle.set_animated(False)
+        self.activeCircle = None # HolderCircle.idx = None
 
         self.background = None
         
@@ -268,7 +276,7 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
 
-    universe = UniversalSet(set(range(50)))
+    universe = UniversalSet(set(range(15)))
 
 
 

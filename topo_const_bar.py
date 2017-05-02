@@ -25,7 +25,7 @@ class TopoConstBarInteractive(EditableRectangle):
                  companion=None, prop_triang=None):
         super(TopoConstBarInteractive, self).__init__(rect_big, mu, nu,
                                                      color_mu, color_nu,
-                                                     companion, prop_triang)
+                                                     companion)
 
         # self.companion from EditableRetangle
         x0, x1 = self.rect.axes.get_xlim()

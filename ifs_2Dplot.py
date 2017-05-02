@@ -59,7 +59,7 @@ def plot_together_intValued(ifs):
     ax0.set_ylabel('Degrees')
     plt.grid(True)
     plt.legend(loc='upper right')
-    plt.title('Interval Valued plot type')
+    plt.title('2 type plot type')
 
 
 def plot_together_Intuitionistic(ifs):
@@ -128,7 +128,7 @@ def plot_bar_Intuitionistic(ifs, plot_pi=False):
     ax0.set_ylabel('Degrees')
     
     plt.legend(loc='upper right')
-    plt.title('Inttuitionistic type stack bars')
+    plt.title('Intuitionistic type stack bars')
     
     # plt.show()
     
@@ -152,7 +152,7 @@ def plot_bar_intValued(ifs):
     ax0.set_ylabel('Degrees')
     
     plt.legend(loc='upper right')
-    plt.title('Interval valued type stack bars')
+    plt.title('2 type stack bars')
     
     # plt.show()
     
@@ -441,6 +441,11 @@ def plot_triangular(mus,nus, rang=1,
     axScatter.set_ylabel('Non-membership', fontsize='x-large')
 
 
+
+    axScatter.set_aspect('equal', 'datalim')
+    # axMuHist.set_aspect('equal', 'datalim')
+    # axNuHist.set_aspect('equal', 'datalim')
+     
 def test_legend():
     # Figure
     plt.figure()

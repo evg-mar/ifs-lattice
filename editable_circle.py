@@ -7,8 +7,6 @@ from matplotlib.patches import Rectangle, Circle
 from intuitionistic_fuzzy_set import IFS
 
 class HolderCircle(Circle):
-    lock =None
-    idx  = None
     
     def __init__(self, axes, munu,
                        radius=0.01,
@@ -20,6 +18,9 @@ class HolderCircle(Circle):
         super(HolderCircle, self).__init__(xy=munu,
                                            radius=radius,
                                            **kwargs)
+        self.lock =None
+        self.idx  = None
+        
         self.axes = axes
         self.axes.add_patch(self)
         # label, facecolor, edgecolor, get_visible, get_alpha

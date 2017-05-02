@@ -94,11 +94,8 @@ if __name__ == "__main__":
 
     for er, companion in zip(prop_bar.editable_rects, prop_triang.holder):
         er.companion = companion
-        er.prop_triang = prop_triang
-#     prop_bar.companion_topo_const = prop_triang.topo_const_triang
-        
-#     prop_bar.
-        
+        # er.prop_triang = prop_triang
+ 
     
     interaction = InteractorBasic(prop_triang, prop_bar)
 
