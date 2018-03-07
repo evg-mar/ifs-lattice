@@ -6,7 +6,7 @@ from matplotlib.patches import Rectangle
 class RectangleBasic(object):
 
     def __init__(self, rect_big, mu, nu, 
-                 color_mu=None, color_nu=None):
+                 color_mu=None, color_nu=None, alpha=0.5):
         
         self.rect = rect_big
         self.axes = self.rect.axes
@@ -17,11 +17,11 @@ class RectangleBasic(object):
         width  = rect_big.get_width()
 
         color_mu = "blue" if color_mu is None else color_mu
-        self.rect_mu = Rectangle((x,y), width, mu, facecolor=color_mu)
+        self.rect_mu = Rectangle((x,y), width, mu, facecolor=color_mu, alpha=alpha)
         self.axes.add_patch(self.rect_mu)
 
         color_nu = "green" if color_nu is None else color_nu
-        self.rect_nu = Rectangle((x,height - nu), width, nu, facecolor=color_nu)
+        self.rect_nu = Rectangle((x,height - nu), width, nu, facecolor=color_nu, alpha=alpha)
         self.rect.axes.add_patch(self.rect_nu)
 
 
@@ -29,10 +29,10 @@ class EditableRectangle(RectangleBasic):
     lock = None # only one can be animated at a time
     
     def __init__(self, rect_big, mu, nu, 
-                 color_mu=None, color_nu=None,
+                 color_mu=None, color_nu=None, alpha=0.5,
                  companion=None):
         super(EditableRectangle, self).__init__(rect_big, mu, nu,
-                                             color_mu, color_nu)
+                                             color_mu, color_nu, alpha)
 
         self.companion = companion
 
@@ -248,13 +248,20 @@ class EditableRectangle(RectangleBasic):
         # restore the background region
         canvas.restore_region(self.background)
 
-        # redraw just the current rectangle
-        self.draw_object()
 
         # blit just the redrawn area
         canvas.blit(self.axes.bbox)
      
+    def blit(self):
+        canvas = self.rect.figure.canvas
+        # restore the background region
+        canvas.restore_region(self.background)
+        # blit just the redrawn area
+        canvas.blit(self.axes.bbox)
+
+
     def draw_object(self):
+
         self.axes.draw_artist(self.rect_mu)
         self.axes.draw_artist(self.rect_nu)      
            
@@ -273,6 +280,9 @@ class EditableRectangle(RectangleBasic):
         self.set_animated(False)
 
         if self.companion is not None:
+            # self.rect.figure.canvas.restore_region(self.companion.background)
+            # self.update_companion()
+
             self.companion.set_animated(False)
 #             self.companion.background = None
 #             self.background = None

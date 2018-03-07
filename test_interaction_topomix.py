@@ -1,4 +1,6 @@
 import numpy as np
+import json
+
 from matplotlib.lines import Line2D
 from matplotlib.artist import Artist
 
@@ -7,6 +9,7 @@ import ifs_operators_plot as oper
 from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
 
 from ifs_properties_plot import PropertiesIFS, PropertiesIFSTopo, TopoConst
+
 
 #from editable_rectangle import PropertiesBar
 
@@ -121,9 +124,9 @@ class TriangularInteractorBasic(object):
 #                                              idx_act,
 #                                              xdata, ydata)                
             elif idx_act == -1:
-                prop_ifs.update_topo_const(self.ax_active,
+                prop_ifs.update_topo_const(#self.ax_active,
                                            xdata, ydata)
-                prop_ifs_inactive.update_topo_const(ax_inactive,
+                prop_ifs_inactive.update_topo_const(#ax_inactive,
                                                     xdata, ydata)
             self.canvas.restore_region(self.background)
 
@@ -336,7 +339,7 @@ if __name__ == '__main__':
 
 #     fig, ax = plt.subplots()
 
-    universe = UniversalSet(set(range(50)))
+    universe = UniversalSet(set(range(20)))
 
 
 
@@ -349,62 +352,47 @@ if __name__ == '__main__':
 
     indices, mus, nus, pis = ifs01.elements_split()
     
+    print('mus and nus: ')
+    print(mus)
+    print(nus)
+    
     ax = plt.subplot2grid((4,6), (0,0), rowspan=3, colspan=3)
     ax_01, line2d1_01 = plot_triangular_(ax,
-                                    mus, nus, ifs01.get_range(), bins=19,
-                                    rotation={'x':45, 'y':0})
-
+                                    mus, nus, ifs01.get_range(), bins=10,
+                                    rotation={'x':45, 'y':0},
+                                    alpha=0.3)
+    ax_01.set_ylabel(r'$\nu$', fontsize=20)
+    ax_01.set_xlabel(r'$\mu$', fontsize=20)
+    
     line2d1_01.set_linestyle(' ')
-    line2d1_01.set_markersize(5)
-    line2d1_01.set_markerfacecolor('r')
-    line2d1_01.set_color('r')
+    line2d1_01.set_markersize(15)
+    line2d1_01.set_markerfacecolor('b')
+    line2d1_01.set_color('b')
 #     line2d1_01.set_marker(marker=r'$\odot$')
     line2d1_01.set_marker(marker=r'o')    
-    line2d1_01.set_zorder(15)
-
-
-#     ifs01 = IFS.random(universe, 1, randseed=2)
-# 
-#     indices, mus, nus, pis = ifs01.elements_split()
-# 
-#     colors={'mu':'b', 'nu':'g', 'elem':'r'}
+    line2d1_01.set_zorder(2)
+ 
+ ########
 #     ax_01, line2d1_02 = plot_triangular_(ax,
-#                                     mus, nus,
-#                                     ifs01.get_range(),
-#                                     colors=colors,
-#                                     bins=19,
-#                                     rotation={'x':45, 'y':0})
-# 
+#                                     mus, nus, ifs01.get_range(), bins=10,
+#                                     rotation={'x':45, 'y':0},
+#                                     alpha=0.3)
+#     ax_01.set_ylabel(r'$\nu$', fontsize=20)
+#     ax_01.set_xlabel(r'$\mu$', fontsize=20)
+#     
 #     line2d1_02.set_linestyle(' ')
-#     line2d1_02.set_markersize(5)
+#     line2d1_02.set_markersize(15)
 #     line2d1_02.set_markerfacecolor('g')
 #     line2d1_02.set_color('g')
-#     line2d1_02.set_marker(marker=r'o')
-#     line2d1_02.set_visible(True)
-#     line2d1_02.set_zorder(15)
-    
-
-
-#     line2d_01.set_alpha(0.5)
-#     fontsize = 12
-#     linepoints = list(zip(*line2d_01.get_data())) 
-#     marker_ann = [ax_01.annotate(str(idx), pt, fontsize=fontsize) 
-#                            for idx, pt in enumerate(linepoints) ]
-# 
+# #     line2d1_01.set_marker(marker=r'$\odot$')
+#     line2d1_02.set_marker(marker=r'v')    
+#     line2d1_02.set_zorder(2)
 #  
-#     prop_ifs01 = PlotPropertiesIFS( ifsname='ifs01',
-#                        line=line2d_01.copy(),
-#                        annotations=marker_ann.copy(),
-#                        radius=5,
-#                        alpha_marker=0.5, 
-#                        labels_size=12, 
-#                        show_ifs=True, show_edges=True, show_ann=True)
-#     
-# #     
-
-
-
-# 
+ 
+ 
+ ###########
+ 
+ 
     ifs02 = IFS.random(universe, 1, randseed=3)
     indices, mus, nus, pis = ifs02.elements_split()
 #  
@@ -413,53 +401,51 @@ if __name__ == '__main__':
 # 
 #      
     _, line2d2_01 = plot_triangular_(ax02,
-                                    mus, nus, ifs02.get_range(), bins=19,
-                                    rotation={'x':45, 'y':0})
+                                    mus, nus, ifs02.get_range(), bins=10,
+                                    rotation={'x':45, 'y':0},
+                                    alpha=0.3)
  
     ax02.get_yaxis().tick_right()
-    ax02.set_ylabel('')
+    ax02.get_yaxis().set_label_position("right")
+    ax02.set_ylabel(r'$\nu$', fontsize=20)
+    ax02.set_xlabel(r'$\mu$', fontsize=20)
  
     line2d2_01.set_linestyle(' ')
-    line2d2_01.set_markersize(5)
-    line2d2_01.set_markerfacecolor('r')
-    line2d2_01.set_color('r')
-    line2d2_01.set_marker(marker=r'o')
+    line2d2_01.set_markersize(15)
+    line2d2_01.set_markerfacecolor('g')
+    line2d2_01.set_color('g')
+    line2d2_01.set_marker(marker=r'v')
 
+########################
 
-#     _, line2d2_02 = plot_triangular_(ax02,
-#                                     mus, nus, ifs02.get_range(), bins=19,
-#                                     rotation={'x':45, 'y':0})
-# 
-#     ax02.get_yaxis().tick_right()
-#     ax02.set_ylabel('')
-# 
-#     line2d2_02.set_linestyle(' ')
-#     line2d2_02.set_markersize(5)
-#     line2d2_02.set_markerfacecolor('g')
-#     line2d2_02.set_color('g')
-#     line2d2_02.set_marker(marker=r'o')
-
-#     line2d_01.set_markersize(20)
-#     line2d_01.set_markerfacecolor('r')
-#     line2d_01.set_marker(marker=r'$\odot$')
     from widgets_basic import WidgetsSimple
 
     widgets = WidgetsSimple(None)
     
-    topo_c0101 = TopoConst(ax_01, 0.7, 0.2, 0.5)
-#     topo_c0102 = TopoConst(ax_01, 0.6, 0.2, 0.5)
+    topo_c0101 = TopoConst(ax_01, 0.4, 0.3, 0.4, 0.65)
+#    topo_c0102 = TopoConst(ax_01, 0.6, 0.2, 0.5)
     
-    topo_c0201 = TopoConst(ax02, 0.7, 0.2, 0.5)    
+    topo_c0201 = TopoConst(ax02, 0.4, 0.3, 0.4, 0.65)
+    json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'
+    json_name = 'topo_const_config.json'
+
+    #topo_c0201.save_to_json(json_path + json_name)
+    
+    #topo_c0201 = TopoConst.from_json(ax=ax02, 
+    #                                 json_path=json_path+json_name)
+        
 #     topo_c0202 = TopoConst(ax02, 0.6, 0.2, 0.5)        
     
 #     prop_bar = PropertiesBar("prop_bar01", mus, nus, ax02)
 
     axlines = {ax_01:[PropertiesIFSTopo(label='ifs01_ax01', holder=line2d1_01,
+                                        labels_size=15,
                                         topo_const=topo_c0101) #,
-#                      PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02,
-#                                        topo_const_triang=topo_c0102)
+                      #PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02)
+                                        #topo_const_triang=topo_c0102)
                         ],
                ax02:[PropertiesIFSTopo(label='ifs01_ax02', holder=line2d2_01,
+                                       labels_size=15,
                                         topo_const=topo_c0201) #,
 #                      PropertiesIFSTopo(label='ifs02_ax01', holder=line2d1_02,
 #                                        topo_const_triang=topo_c0102)
@@ -470,7 +456,20 @@ if __name__ == '__main__':
     p = TriangularInteractorBasic(ax_01, ax02, axlines, widgets)
     
 #     p = TriangularInteractor(ax_01, line2d_01)
+
+#     json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'    
+#     json_prop_name = 'property01.json'
+#     prop01 = PropertiesIFS.from_json(json_path + json_prop_name, 
+#                                      ax, 
+#                                      bins=10, 
+#                                      rotation={'x':45, 'y':0})
     
     plt.show()
+
+
+    json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'
+    json_prop_name = 'property01.json'
+    axlines[ax_01][0].save_to_json(json_path + json_prop_name,
+                                   json_path + 'topo_const_config.json')
     
-    a =10
+    print('Finish and save...')

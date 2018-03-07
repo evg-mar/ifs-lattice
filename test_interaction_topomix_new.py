@@ -89,7 +89,7 @@ if __name__ == "__main__":
     prop_triang = IfsTriangTopoConstInteractive(axes01, (mus, nus),
                                    topo_const_triang=topoconst,             
                                    radius=.01,
-                                   companions=prop_bar.editable_rects)
+                                   companions=[prop_bar.editable_rects])
 #                                    companion_topo_const=prop_bar.topo_const_bar)
 
     for er, companion in zip(prop_bar.editable_rects, prop_triang.holder):

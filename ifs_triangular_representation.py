@@ -120,7 +120,7 @@ class IfsTriangInteractive(IfsTriang):
         self.activeCircle = None
 
         self.companions = companions
-        self.companion = None
+        # self.companion = None
         self.companion_elements = None
 
 
@@ -166,14 +166,21 @@ class IfsTriangInteractive(IfsTriang):
 
         if self.companions is not None:                
             
-            #self.companion_elements = []
-            #for self.companions
+            ### companion elements
+            self.companion_elements = [comp[self.activeCircle.idx] \
+                                       for comp in self.companions]
+            for companion_elem in self.companion_elements:
+                companion_elem.set_animated(True)
+                companion_elem.background = \
+                    canvas.copy_from_bbox(companion_elem.axes.figure.bbox)
+                companion_elem.draw_blit()
+            ###
             
-            self.companion = self.companions[self.activeCircle.idx]
-            self.companion.set_animated(True)
-            self.companion.background = \
-                canvas.copy_from_bbox(self.companion.axes.figure.bbox)
-            self.companion.draw_blit()
+#             self.companion = self.companions[0][self.activeCircle.idx]
+#             self.companion.set_animated(True)
+#             self.companion.background = \
+#                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
+#             self.companion.draw_blit()
                     
         
     def on_motion(self, event):
@@ -194,13 +201,21 @@ class IfsTriangInteractive(IfsTriang):
      
     
         canvas = self.axes.figure.canvas
-#         canvas = self.companion.rect.figure.canvas
+
         canvas.restore_region(self.background)
 
         if self.companions is not None:
-            self.companion.set_munu((event.xdata, event.ydata))
-            self.companion.draw_object()
-            canvas.blit(self.companion.axes.bbox)
+            
+            ### companion_elements
+            for comp_elem in self.companion_elements:
+                comp_elem.set_munu((event.xdata, event.ydata))
+                comp_elem.draw_object()
+                canvas.blit(comp_elem.axes.bbox)
+
+
+#             self.companion.set_munu((event.xdata, event.ydata))
+#             self.companion.draw_object()
+#             canvas.blit(self.companion.axes.bbox)
 
         obj.draw_object()
         canvas.blit(self.axes.bbox)
@@ -226,9 +241,16 @@ class IfsTriangInteractive(IfsTriang):
         self.background = None
         
         if self.companions is not None:
-            self.companion.set_animated(False)
-            self.companion.background = None
-            self.companion = None
+            
+            for comp_elem in self.companion_elements:
+                comp_elem.set_animated(False)
+                comp_elem.background = None
+                
+            self.companion_elements = None
+
+#             self.companion.set_animated(False)
+#             self.companion.background = None
+#             self.companion = None
         # redraw the full figure
         self.axes.figure.canvas.draw()
 
@@ -278,33 +300,29 @@ if __name__ == '__main__':
 
     universe = UniversalSet(set(range(15)))
 
-
-
     fig = plt.figure()
     plt.subplots_adjust(hspace=0.1, wspace=0.1)
-    
-
 
     ifs01 = IFS.random(universe, 1, randseed=1)
 
     indices, mus, nus, pis = ifs01.elements_split()
     
     ax = plt.subplot2grid((4,6), (0,0), rowspan=3, colspan=3)
-#     ax_01, line2d1_01 = plot_triangular_(ax,
-#                                     mus, nus, ifs01.get_range(), bins=19,
-#                                     rotation={'x':45, 'y':0})
 
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-    # rects = ax.bar(range(10), [1]*10)
-#     circ = HolderCircle(ax, (0.1,0.6), label='tuka')
-#     prop = IfsTriang(ax, ([0.1, 0.4, 0.6], [0.6, 0.4, 0.4]),
-#                                 radius=.01)
 
     topoconst = TopoConstTriangInteractive(ax, 0.6, 0.2, 0.5)
 
     ifs_topoconst = IfsTriangTopoConstInteractive(ax, (mus,nus), topoconst)
     ifs_topoconst.connect()
+    
+
+    ifs02 = IFS.random(universe, 1, randseed=2)
+    indices2, mus2, nus2, pis2 = ifs02.elements_split()
+
+    ifs_triang02 = IfsTriangInteractive(ax, (mus2, nus2))
+#    ifs_triang02.connect()
+    
+    
 #     ifstriang_topoconst = IfsTriangInteractive(ax, (mus,nus))
 #     ifstriang_topoconst.connect()
 #     prop.connect()

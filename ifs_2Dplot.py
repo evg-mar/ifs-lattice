@@ -212,7 +212,10 @@ def plot_triangular_(ax,
                     mus,nus, rang=1,
                     bins={'mu':10, 'nu':10},
                     colors={'mu':'b', 'nu':'g', 'elem':'r'},
-                    rotation=None):
+                    rotation=None,
+                    marker='o',
+                    alpha=0.4,
+                    color='b'):
     assert(type(bins) in [int, dict])
     if type(bins) == int:
         bins = {'mu':bins, 'nu':bins}
@@ -237,8 +240,8 @@ def plot_triangular_(ax,
     plot_triangle(rang, axScatter, 'k')
     
     line2d_, = axScatter.plot(mus, nus, 
-                              marker='o', markerfacecolor=colors['elem'],
-                              linestyle=' ', color='b')
+                              marker=marker, markerfacecolor=colors['elem'],
+                              linestyle=' ', color=color, alpha=alpha)
 
     if rotation is not None:
         rotate_axislabels(axScatter, rotation)

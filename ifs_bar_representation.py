@@ -9,9 +9,12 @@ class IfsBar(object):
                        bar_type, # EditableRectangle or RectangleBasic
                        musnus,
                        axes=None,
+                       color_mu='blue',
+                       color_nu='green',
                        alpha=0.5, 
                        hide_ifs=False,
-                       showlabels=False):
+                       showlabels=False,
+                       companion=None):
         assert(len(musnus[0])==len(musnus[0]))
         self.label = label
         self.axes = axes
@@ -25,22 +28,44 @@ class IfsBar(object):
         self.axes.set_aspect(aspect='auto', adjustable='datalim')
         self.axes.set_ylim([0,1])
 
+        self.companion = companion
+                 
+
         self.editable_rects = [Rectangle((0,0), 1, 1)] * len(self.indices)
 
         for idx, (rect, mu, nu) in enumerate(zip(self.bar, self.mus, self.nus)):
             rect.set_facecolor("white")
-            er = bar_type(rect, mu, nu)
+            er = bar_type(rect, mu, nu, color_mu, color_nu, alpha)
 #             er.connect()
             self.editable_rects[idx] = er
+            if self.companion is not None:
+                er.companion = self.companion[idx]
+                er.on_release(None)
+                er.companion.on_release(None)
 
         self.alpha = alpha 
         self.hide_ifs = hide_ifs
 
+
+    def draw_blit(self):
+        for er in self.editable_rects:
+            er.draw_blit()
+            
+    @property
+    def get_size(self):
+        return len(self.indices)
+    
+    def set_companion(self, companion):
+        self.companion = companion
+        for er, comp in zip(self.editable_rects, self.companion):
+            er.companion = comp
+            comp.on_release(None)
+            er.on_release(None)
                
     def connect(self):
         for er in self.editable_rects:
             er.connect()
-            
+
     def disconnect(self):
         for er in self.editable_rects:
             er.disconnect()
@@ -79,22 +104,32 @@ class IfsBarTopoConst(IfsBar):
                        topo_const_type, # TopoConstBarInteractive
                        alpha_beta,
                        axes=None,
+                       color_mu='blue',
+                       color_nu='green',
                        alpha=0.5, 
                        hide_ifs=False,
-                       showlabels=False):
+                       showlabels=False,
+                       companion=None):
         super(IfsBarTopoConst, self).__init__(label, bar_type, musnus,
-                                              axes, alpha,
-                                              hide_ifs, showlabels)
+                                              axes, color_mu, color_nu, alpha,
+                                              hide_ifs, showlabels,
+                                              companion=companion)
         start_xlim, end_xlim = self.axes.get_xlim()
+        print('start: ' + str(start_xlim))
+        print('end: ' + str(end_xlim))
+        
         width = 0.1
         height = 1.0
-        rect = Rectangle((end_xlim, 0.0), width, height,
+        #self.axes.set_xlim([start_xlim, end_xlim + width])
+        rect = Rectangle((end_xlim-width, 0.0), width, height,
                          fc='white')
+        
         self.axes.add_patch(rect)
         self.topo_const_bar = topo_const_type(rect, 
                                           alpha_beta[0],
                                           alpha_beta[1])
 
+        
 
     def connect(self):
         super(IfsBarTopoConst, self).connect()
@@ -119,19 +154,35 @@ if __name__ == '__main__':
 #     prop1.connect()
 
     prop1 = IfsBarTopoConst("proba01", EditableRectangle,  
-                   ([0.1, 0.4, 0.6],[0.6, 0.4, 0.4]),
+                   ([0.1, 0.4, 0.6, 0.2, 0.4, 0.5],[0.6, 0.4, 0.4, 0.4, 0.3, 0.2]),
                    topo_const_type=TopoConstBarInteractive,
                    alpha_beta = (0.3, 0.5),
                     axes=axes1)
     prop1.connect()
+    
+
+    prop01 = IfsBarTopoConst("proba001", EditableRectangle,  
+                   ([0.3, 0.2, 0.1, 0.6, 0.1, 0.5],[0.3, 0.7, 0.7, 0.2, 0.8, 0.3]),
+                   topo_const_type=TopoConstBarInteractive,
+                   alpha_beta = (0.2, 0.9),
+                    axes=axes1,
+                    alpha=0.3)
+    prop01.connect()
+
 
     
     axes2 = plt.subplot2grid((1,2), (0,1), 
                              sharey=axes1, sharex=axes1,
                              rowspan=1, colspan=1)
     axes2.yaxis.set_label_position("left")
-    prop2 = IfsBar('basic_rect', RectangleBasic, 
-                   ([0.1, 0.4, 0.6], [0.6, 0.4, 0.4]),
-                   axes=axes2)
+    prop2 = IfsBarTopoConst("proba02", EditableRectangle,  
+                   ([0.3, 0.2, 0.1, 0.6, 0.1, 0.5],[0.3, 0.7, 0.7, 0.2, 0.8, 0.3]),
+                   topo_const_type=TopoConstBarInteractive,
+                   alpha_beta = (0.3, 0.5),
+                    axes=axes2,
+                    companion=prop1.editable_rects)
+    prop2.connect()
 
+    prop1.set_companion(prop2.editable_rects)
+    
     plt.show()
