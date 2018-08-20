@@ -13,11 +13,16 @@ class HolderCircle(Circle):
                        annotation_size=12,
 #                        visible=True,
                        show_annotation=True,
+                       edgecolor="black",
+                       alpha_marker=0.5,
 #                        showvert=True,
                        **kwargs):
         super(HolderCircle, self).__init__(xy=munu,
                                            radius=radius,
+                                           edgecolor=edgecolor,
+                                           alpha=alpha_marker,
                                            **kwargs)
+        self.set_edgecolor(edgecolor)
         self.lock =None
         self.idx  = None
         
@@ -53,6 +58,17 @@ class HolderCircle(Circle):
                                      self.center,
                                      fontsize='medium') #, zorder=10)
 
+    def draw_blit(self):
+        canvas = self.axes.figure.canvas
+#        canvas = self.rect.figure.canvas
+        # restore the background region
+        canvas.restore_region(self.background)
+
+
+        # blit just the redrawn area
+        canvas.blit(self.axes.figure.bbox)
+            
+            
     def draw_object(self):
         self.axes.draw_artist(self)
         for obj, active_flag in self.active_objects.items():

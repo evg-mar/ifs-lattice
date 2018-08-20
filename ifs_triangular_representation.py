@@ -6,7 +6,7 @@ import abc
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import collections
 
 class IfsTriangAbstract(object):
     __metaclass__  = abc.ABCMeta
@@ -20,40 +20,14 @@ class IfsTriangAbstract(object):
     def get_data_pair(self):
         return
      
-#     @abc.abstractmethod
-#     def set_data(self, mu, nu):
-#         return
-     
-#     @abc.abstractclassmethod
-#     def get_color(self):
-#         return
-#  
-#     @abc.abstractclassmethod
-#     def set_color(self):
-#         return
-
 from ifs_2Dplot import plot_triangle
 
 class IfsTriang(IfsTriangAbstract):
     flip = 1
 
-    def __init__(self, axes, musnus,
-                       radius=0.01,
-                       labels=None,
-                       picker=10,
-                       alpha_marker=0.5, 
-                       visible=True,
-                       annotation_size=12,
-                       show_annotation=True,
-                       colors = {'mu':'b', 'nu':'g', 'elem':'r'},
-                       bins = {'mu':10, 'nu':10}
-                       ):
-        print("in ifs triang...")
-                
-        self.axes = axes
-        self.labels = labels if (labels is not None) \
-                             else list(range(len(musnus[0])))
-
+    
+    def __init(self, bins, colors):
+                                     
         rang = 1
 #         rotation=None
 
@@ -71,15 +45,41 @@ class IfsTriang(IfsTriangAbstract):
             lin.set_color(colors['nu'])
                              
         self.axes.legend(loc='upper right')                    
+
         
+    
+    def __init__(self, axes, musnus,
+                       radius=0.01,
+                       labels=None,
+                       picker=10,
+                       alpha_marker=0.5, 
+                       visible=True,
+                       annotation_size=12,
+                       show_annotation=True,
+                       colors = {'mu':'b', 'nu':'g', 'elem':'r'},
+                       bins = {'mu':10, 'nu':10},
+                       init_flag=True):
+        print("in ifs triang...")
+                
+        self.axes = axes
+        self.labels = labels if (labels is not None) \
+                             else list(range(len(musnus[0])))
+
+        if init_flag:
+            self.__init(bins, colors)
+                             
         self.holder = []
 
-        for label, mu, nu in zip(self.labels, *musnus):
+        radia = radius if isinstance(radius, collections.Iterable) \
+                             else [radius]*len(self.labels)
 
-            obj = HolderCircle(axes, (mu,nu), radius,
+        for label, rad, mu, nu in zip(self.labels, radia, *musnus):
+
+            obj = HolderCircle(axes, (mu,nu), rad,
                                label=str(label),
                                color=colors['elem'],
-                               picker=picker)
+                               picker=picker,
+                               alpha_marker=alpha_marker)
 
             self.holder.append(obj)
 
@@ -93,6 +93,7 @@ class IfsTriang(IfsTriangAbstract):
         return np.array(list(mus)), np.array(list(nus)) 
 
 
+
 class IfsTriangInteractive(IfsTriang):
     def __init__(self,axes, musnus,
                        radius=0.01,
@@ -104,7 +105,8 @@ class IfsTriangInteractive(IfsTriang):
                        annotation_size=12,
                        show_annotation=True,
                        colors = {'mu':'b', 'nu':'g', 'elem':'r'},
-                       bins = {'mu':10, 'nu':10}
+                       bins = {'mu':10, 'nu':10},
+                       init_flag=True
                        ):
         super(IfsTriangInteractive, self).__init__(axes, musnus,
                                                    radius,
@@ -115,7 +117,8 @@ class IfsTriangInteractive(IfsTriang):
                                                    annotation_size,
                                                    show_annotation,
                                                    colors,
-                                                   bins)
+                                                   bins,
+                                                   init_flag)
 
         self.activeCircle = None
 
@@ -123,6 +126,19 @@ class IfsTriangInteractive(IfsTriang):
         # self.companion = None
         self.companion_elements = None
 
+        
+        xdata, ydata = 0.5, 0.5
+        self.x2Dline, = self.axes.plot([xdata]*3,
+                                  [0.0, ydata,  1-xdata],
+                                  color='r',
+                                  linewidth=2)
+        self.x2Dline.set_visible(False)
+
+        self.y2Dline, = self.axes.plot([0.0, xdata, 1 - ydata],
+                                  [ydata]*3,
+                                  color='g',
+                                  linewidth=2)
+        self.y2Dline.set_visible(False)
 
     def connect(self):
         'connect to all the events we need'
@@ -143,45 +159,79 @@ class IfsTriangInteractive(IfsTriang):
         print("on press...")
 
     def on_pick(self, event):
+#        self.connect()
+        
         print("on pick..", event.artist)
         if not isinstance(event.artist, HolderCircle):
             return
+        if event.artist not in self.holder:
+            return
         if self.activeCircle is not None:
             return
+
         self.activeCircle = event.artist
         # HolderCircle.lock = event.artist
-        self.activeCircle.idx  = self.holder.index(event.artist)
-        
-        event.artist.set_animated(True)
+        for c in self.holder:
+            print(c)
+        print(event.artist)
 
+        self.activeCircle.idx  = self.holder.index(event.artist)
+
+        
         canvas = self.axes.figure.canvas
         canvas.draw()
 
+        
+#        event.artist.set_animated(True)
+        self.activeCircle.set_animated(True)
+        self.activeCircle.background =  \
+                canvas.copy_from_bbox(self.activeCircle.axes.figure.bbox)
+        self.activeCircle.draw_blit()
+
+
         self.background = canvas.copy_from_bbox(self.axes.figure.bbox)
         # now redraw just the rectangle
-        event.artist.draw_object()
-
-        # and blit just the redrawn area
-        canvas.blit(self.axes.bbox)
+#        event.artist.draw_object()
 
         if self.companions is not None:                
             
             ### companion elements
-            self.companion_elements = [comp[self.activeCircle.idx] \
+            self.companion_elements = [(comp[0], comp[1][self.activeCircle.idx]) \
                                        for comp in self.companions]
-            for companion_elem in self.companion_elements:
+            for action, companion_elem in self.companion_elements:
                 companion_elem.set_animated(True)
                 companion_elem.background = \
                     canvas.copy_from_bbox(companion_elem.axes.figure.bbox)
                 companion_elem.draw_blit()
             ###
+
+        xdata, ydata = self.activeCircle.get_munu()
+        if xdata + ydata > 1.0:
+           xdata, ydata = ((xdata-ydata+1)/2, (ydata-xdata+1)/2)
             
-#             self.companion = self.companions[0][self.activeCircle.idx]
-#             self.companion.set_animated(True)
-#             self.companion.background = \
-#                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
-#             self.companion.draw_blit()
-                    
+        self.x2Dline.set_data([xdata]*3,
+                                  [0.0, ydata,  1-xdata])
+#        self.axes.draw_artist(self.x2Dline)
+        
+        self.y2Dline.set_data([0.0, xdata, 1 - ydata],
+                                  [ydata]*3)
+#        self.axes.draw_artist(self.y2Dline)        
+  
+           
+        self.x2Dline.set_visible(True)
+        self.x2Dline.set_linestyle('-')
+        self.x2Dline.set_animated(True)
+        print(type(self.x2Dline))
+        
+
+        self.y2Dline.set_visible(True)
+        self.y2Dline.set_linestyle('-')
+        self.y2Dline.set_animated(True)
+
+        self.axes.draw_artist(self.x2Dline) 
+        self.axes.draw_artist(self.y2Dline) 
+#        # and blit just the redrawn area
+        canvas.blit(self.axes.bbox)                    
         
     def on_motion(self, event):
         'on motion we will move the rect if the mouse is over us'
@@ -194,12 +244,16 @@ class IfsTriangInteractive(IfsTriang):
         if (self.activeCircle is None) or (self.activeCircle.idx is None):
             return
 
+            
+        xdata, ydata = event.xdata, event.ydata
+        if xdata + ydata > 1.0:
+           xdata, ydata = ((xdata-ydata+1)/2, (ydata-xdata+1)/2)
+        
         obj = self.activeCircle
-        obj.set_munu((event.xdata, event.ydata))
+        obj.set_munu((xdata, ydata))
         print('animated in motion...: ', obj.get_animated(), obj.annotation.get_animated())
         print(obj)
-     
-    
+
         canvas = self.axes.figure.canvas
 
         canvas.restore_region(self.background)
@@ -207,15 +261,23 @@ class IfsTriangInteractive(IfsTriang):
         if self.companions is not None:
             
             ### companion_elements
-            for comp_elem in self.companion_elements:
-                comp_elem.set_munu((event.xdata, event.ydata))
+            for action, comp_elem in self.companion_elements:
+                comp_elem.set_munu(action(xdata, ydata))
                 comp_elem.draw_object()
-                canvas.blit(comp_elem.axes.bbox)
+#            if comp_elem_last is not None:
+#                canvas.blit(comp_elem.axes.bbox)
+        self.x2Dline.set_data([xdata]*3,
+                                  [0.0, ydata,  1-xdata])
+        self.axes.draw_artist(self.x2Dline)
+        
+        self.y2Dline.set_data([0.0, xdata, 1 - ydata],
+                                  [ydata]*3)
+        self.axes.draw_artist(self.y2Dline)        
+#        self.x2Dline.set_visible(True)    
+#        self.y2Dline.set_visible(True)
+#        self.draw_blit(self.x2Dline)
 
 
-#             self.companion.set_munu((event.xdata, event.ydata))
-#             self.companion.draw_object()
-#             canvas.blit(self.companion.axes.bbox)
 
         obj.draw_object()
         canvas.blit(self.axes.bbox)
@@ -242,15 +304,19 @@ class IfsTriangInteractive(IfsTriang):
         
         if self.companions is not None:
             
-            for comp_elem in self.companion_elements:
+            for action, comp_elem in self.companion_elements:
                 comp_elem.set_animated(False)
                 comp_elem.background = None
                 
             self.companion_elements = None
 
-#             self.companion.set_animated(False)
-#             self.companion.background = None
-#             self.companion = None
+            
+        self.x2Dline.set_visible(False)    
+        self.y2Dline.set_visible(False)    
+        self.x2Dline.set_animated(False)    
+        self.y2Dline.set_animated(False)    
+
+            
         # redraw the full figure
         self.axes.figure.canvas.draw()
 
@@ -268,7 +334,8 @@ class IfsTriangTopoConstInteractive(IfsTriangInteractive):
                        annotation_size=12,
                        show_annotation=True,
                        colors = {'mu':'b', 'nu':'g', 'elem':'r'},
-                       bins = {'mu':10, 'nu':10}                 
+                       bins = {'mu':10, 'nu':10},
+                       init_flag=True    
                  ):
         super(IfsTriangTopoConstInteractive, self).__init__(axes, musnus,
                        radius,
@@ -280,7 +347,8 @@ class IfsTriangTopoConstInteractive(IfsTriangInteractive):
                        annotation_size,
                        show_annotation,
                        colors,
-                       bins)
+                       bins,
+                       init_flag)
         self.topo_const_triang = topo_const_triang
 #         self.companion_topo_const = companion_topo_const
         
@@ -311,16 +379,16 @@ if __name__ == '__main__':
 
 
     topoconst = TopoConstTriangInteractive(ax, 0.6, 0.2, 0.5)
-
-    ifs_topoconst = IfsTriangTopoConstInteractive(ax, (mus,nus), topoconst)
-    ifs_topoconst.connect()
-    
+#
+#    ifs_topoconst = IfsTriangTopoConstInteractive(ax, (mus,nus), topoconst)
+#    ifs_topoconst.connect()
+#    
 
     ifs02 = IFS.random(universe, 1, randseed=2)
     indices2, mus2, nus2, pis2 = ifs02.elements_split()
 
     ifs_triang02 = IfsTriangInteractive(ax, (mus2, nus2))
-#    ifs_triang02.connect()
+    ifs_triang02.connect()
     
     
 #     ifstriang_topoconst = IfsTriangInteractive(ax, (mus,nus))

@@ -4,9 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 # from matplotlib import style
 
-# style.use('ggplot')
-
-
 def rotate_axislabels(ax, angles={'x': 45,'y': 45,'z': 45}):
     if 'x' in angles:
         for label in ax.xaxis.get_ticklabels():

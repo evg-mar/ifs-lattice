@@ -1,14 +1,15 @@
-import numpy as np
-from matplotlib.lines import Line2D
+#import numpy as np
+#from matplotlib.lines import Line2D
 
 from topo_const_triang import TopoConstTriangInteractive
-from ifs_properties_plot import PropertiesIFSTopo,\
-     PropertiesIFSTopoInteractive, TopoConst, TopoConstInteractive
+#from ifs_properties_topo import PropertiesIFSTopo,\
+#     PropertiesIFSTopoInteractive, TopoConst, TopoConstInteractive
 
-from ifs_bar_representation import IfsBar, IfsBarTopoConst
+from ifs_bar_representation import IfsBarTopoConst # IfsBar, 
 from editable_rectangle import EditableRectangle
-from ifs_triangular_representation import IfsTriangInteractive,\
-    IfsTriangTopoConstInteractive
+from ifs_triangular_representation import IfsTriangTopoConstInteractive #,\
+                                            #IfsTriangInteractive
+    
 from topo_const_bar import TopoConstBarInteractive
 
 from widgets_basic import WidgetsSimple
@@ -32,10 +33,10 @@ class InteractorBasic(object):
 if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
-    from intuitionistic_fuzzy_set import *
+    from intuitionistic_fuzzy_set import IFS
     from universal_set import UniversalSet
-    from ifs_2Dplot import *
-    from ifs_operators_topo import *
+#    from ifs_2Dplot import *
+#    from ifs_operators_topo import *
     
     
 

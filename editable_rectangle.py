@@ -17,11 +17,11 @@ class RectangleBasic(object):
         width  = rect_big.get_width()
 
         color_mu = "blue" if color_mu is None else color_mu
-        self.rect_mu = Rectangle((x,y), width, mu, facecolor=color_mu, alpha=alpha)
+        self.rect_mu = Rectangle((x,y), width, mu, color=color_mu, alpha=alpha)
         self.axes.add_patch(self.rect_mu)
 
         color_nu = "green" if color_nu is None else color_nu
-        self.rect_nu = Rectangle((x,height - nu), width, nu, facecolor=color_nu, alpha=alpha)
+        self.rect_nu = Rectangle((x,height - nu), width, nu, color=color_nu, alpha=alpha)
         self.rect.axes.add_patch(self.rect_nu)
 
 
@@ -30,11 +30,11 @@ class EditableRectangle(RectangleBasic):
     
     def __init__(self, rect_big, mu, nu, 
                  color_mu=None, color_nu=None, alpha=0.5,
-                 companion=None):
+                 companions=[]):
         super(EditableRectangle, self).__init__(rect_big, mu, nu,
                                              color_mu, color_nu, alpha)
 
-        self.companion = companion
+        self.companions = companions
 
         self.press_xy = None
         self.mu_data = None
@@ -44,18 +44,21 @@ class EditableRectangle(RectangleBasic):
             self.rect.figure.canvas.copy_from_bbox(self.axes.figure.bbox)
 
 
-    
+    @property
     def get_idx(self):
         return self.rect.get_x()
-    
+  
+    @property    
     def get_mu(self):
         return self.rect_mu.get_y()
     
+    @property
     def get_nu(self):
         return self.rect.get_height() - self.rect_nu.get_y()
     
+    @property    
     def get_pi(self):
-        return self.rect.get_height() - self.get_mu() - self.get_mu() 
+        return self.rect.get_height() - self.get_mu - self.get_mu 
 
     ## Setters
     def set_mu(self, mu):
@@ -127,11 +130,12 @@ class EditableRectangle(RectangleBasic):
         
         self.set_animated(True)
         
-        if self.companion is not None:
-            print("companion of rectangle set animated True")
+#        if len(self.companions) > 0:
+#            print("companion of rectangle set animated True")
 #             self.companion.background = \
 #                 canvas.copy_from_bbox(self.companion.axes.figure.bbox)
-            self.companion.set_animated(True)
+        for companion in self.companions:
+            companion.set_animated(True)
      
         canvas.draw()        
         
@@ -143,10 +147,16 @@ class EditableRectangle(RectangleBasic):
         # and blit just the redrawn area
         canvas.blit(axes.bbox)
 
-        if self.companion is not None:
-            self.companion.background = \
-                canvas.copy_from_bbox(self.companion.axes.figure.bbox)
-            self.update_companion()
+        for idx, companion in enumerate(self.companions):
+            companion.background = \
+                canvas.copy_from_bbox(companion.axes.figure.bbox)
+            self.update_companion(idx)
+            
+            
+#        if self.companion is not None:
+#            self.companion.background = \
+#                canvas.copy_from_bbox(self.companion.axes.figure.bbox)
+#            self.update_companion()
 
 
     def draw_callback(self, event):
@@ -159,14 +169,20 @@ class EditableRectangle(RectangleBasic):
         canvas.blit(self.rect.axes.bbox)        
         self.background = canvas.copy_from_bbox(self.rect.axes.figure.bbox)
 
-    def update_companion(self):
+    def update_companion(self, idx):
 #         self.companion.set_mu(self.rect_mu.get_height())
 #         self.companion.set_nu(1-self.rect_nu.get_y())
-        self.companion.set_data(self.rect_mu.get_height(),
-                                1-self.rect_nu.get_y())
+        companion = self.companions[idx]
+        companion.set_data(self.rect_mu.get_height(),
+                            1-self.rect_nu.get_y())
+        companion.draw_object()
+        companion.axes.figure.canvas.blit(companion.axes.bbox)
+            
+#        self.companion.set_data(self.rect_mu.get_height(),
+#                                1-self.rect_nu.get_y())
 
-        self.companion.draw_object()
-        self.companion.axes.figure.canvas.blit(self.companion.axes.bbox)
+#        self.companion.draw_object()
+#        self.companion.axes.figure.canvas.blit(self.companion.axes.bbox)
 
 
     def update_nu(self, event):
@@ -238,9 +254,14 @@ class EditableRectangle(RectangleBasic):
         # blit just the redrawn area
         canvas.blit(self.axes.bbox)
 
-        if self.companion is not None:
-            canvas.restore_region(self.companion.background)
-            self.update_companion()
+        for idx, companion in enumerate(self.companions):
+            canvas.restore_region(companion.background)
+            self.update_companion(idx)
+
+#        
+#        if self.companion is not None:
+#            canvas.restore_region(self.companion.background)
+#            self.update_companion()
 
         
     def draw_blit(self):
@@ -279,14 +300,31 @@ class EditableRectangle(RectangleBasic):
         # turn off the rect animation property and reset the background
         self.set_animated(False)
 
-        if self.companion is not None:
-            # self.rect.figure.canvas.restore_region(self.companion.background)
-            # self.update_companion()
-
-            self.companion.set_animated(False)
+        for companion in self.companions:
+            companion.set_animated(False)
+        
+#        if self.companion is not None:
+#            # self.rect.figure.canvas.restore_region(self.companion.background)
+#            # self.update_companion()
+#
+#            self.companion.set_animated(False)
 #             self.companion.background = None
 #             self.background = None
 
         # redraw the full figure
         self.rect.figure.canvas.draw()
 
+###############################################################################       
+        
+class EditableRectangleRadius(EditableRectangle):
+    
+    def update_companion(self, idx):
+#         self.companion.set_mu(self.rect_mu.get_height())
+#         self.companion.set_nu(1-self.rect_nu.get_y())
+#        self.companion.set_data(self.rect_mu.get_height(),
+#                                1-self.rect_nu.get_y())
+        companion = self.companions[idx]
+        companion.set_radius(self.rect_mu.get_height())
+    
+        companion.draw_object()
+        companion.axes.figure.canvas.blit(companion.axes.bbox)

@@ -4,15 +4,11 @@ import json
 from matplotlib.lines import Line2D
 from matplotlib.artist import Artist
 
-import ifs_operators_plot as oper  
+#import ifs_operators_plot as oper  
 
-from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
+#from ifs_properties_plot import PropertiesIFSTopo
 
-from ifs_properties_plot import PropertiesIFS, PropertiesIFSTopo, TopoConst
-
-
-#from editable_rectangle import PropertiesBar
-
+from ifs_properties_topo import PropertiesIFSTopo, TopoConst
 
 class TriangularInteractorBasic(object):
     line_active__  = 0
@@ -327,7 +323,6 @@ class TriangularInteractorBasic(object):
 
 ###################################################################
 
-
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from intuitionistic_fuzzy_set import *
@@ -361,6 +356,7 @@ if __name__ == '__main__':
                                     mus, nus, ifs01.get_range(), bins=10,
                                     rotation={'x':45, 'y':0},
                                     alpha=0.3)
+    print(type(line2d1_01))
     ax_01.set_ylabel(r'$\nu$', fontsize=20)
     ax_01.set_xlabel(r'$\mu$', fontsize=20)
     
@@ -418,14 +414,14 @@ if __name__ == '__main__':
 
 ########################
 
-    from widgets_basic import WidgetsSimple
+    from widgets_basic import WidgetsSimpleTopo, WidgetsSimple
 
-    widgets = WidgetsSimple(None)
+    widgets = WidgetsSimpleTopo(None)
     
-    topo_c0101 = TopoConst(ax_01, 0.4, 0.3, 0.4, 0.65)
+    topo_c0101 = TopoConst(ax_01, 0.4, 0.3, 0.4, 0.65, label="topo_const01")
 #    topo_c0102 = TopoConst(ax_01, 0.6, 0.2, 0.5)
     
-    topo_c0201 = TopoConst(ax02, 0.4, 0.3, 0.4, 0.65)
+    topo_c0201 = TopoConst(ax02, 0.4, 0.3, 0.4, 0.65, label="topo_const02")
     json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'
     json_name = 'topo_const_config.json'
 

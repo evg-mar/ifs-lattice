@@ -4,7 +4,7 @@ from matplotlib.artist import Artist
 
 import ifs_operators_plot as oper  
 
-from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
+#from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
 
 from ifs_properties_plot import PropertiesIFS, PropertiesIFSTopo, TopoConst
 

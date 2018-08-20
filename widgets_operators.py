@@ -5,7 +5,7 @@ from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
 class WidgetsSimple(object):
 
     x_start__ = 0.05
-    y_start__ = 0.02
+    y_start__ = 0.05
  
     text_length__ = 0.025
     text_hight__ = 0.025
