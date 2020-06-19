@@ -6,8 +6,8 @@ import ifs_operators_plot as oper
 
 #from matplotlib.widgets import Slider, Button, RadioButtons, CheckButtons
 
-from ifs_properties_plot import PropertiesIFS, PropertiesIFSTopo, TopoConst
-
+from ifs_properties_plot import PropertiesIFS
+from ifs_properties_topo import PropertiesIFSTopo, TopoConst
 
 class TriangularInteractorBasic(object):
     line_active__  = 0
@@ -455,11 +455,11 @@ if __name__ == '__main__':
 
     widgets = WidgetsBasic(None)
     
-    topo_c0101 = TopoConst(ax_01, 0.7, 0.2, 0.5)
-    topo_c0102 = TopoConst(ax_01, 0.6, 0.2, 0.5)
+    topo_c0101 = TopoConst(ax_01, 0.7, 0.2, 0.5, 0.3, 0.5)
+    topo_c0102 = TopoConst(ax_01, 0.6, 0.2, 0.5, 0.3, 0.5)
     
-    topo_c0201 = TopoConst(ax02, 0.7, 0.2, 0.5)    
-    topo_c0202 = TopoConst(ax02, 0.6, 0.2, 0.5)        
+    topo_c0201 = TopoConst(ax02, 0.7, 0.2, 0.5, 0.3, 0.5)
+    topo_c0202 = TopoConst(ax02, 0.6, 0.2, 0.5, 0.3, 0.5)
 
     axlines = {ax_01:[PropertiesIFSTopo(label='ifs01_ax01', holder=line2d1_01,
                                         topo_const=topo_c0101),

@@ -47,7 +47,7 @@ class WidgetsSimple(object):
 #            self.save_btax.cla()
 #        self.save_btax = plt.axes([0.3, 0.05, 
 #                                       self.button_length__, 
-#                                       self.button_height__], axisbg=axcolor)
+#                                       self.button_height__], facecolor=axcolor)
 #        self.w_bt_save = Button(self.save_btax, 'Save \nIFS')
 #
 #        
@@ -61,7 +61,7 @@ class WidgetsSimple(object):
         self.textsize_slax = plt.axes([self.x_start__, 
                                self.y_start__ + 2*(self.slider_hight__ + self.text_hight__), 
                                        self.slider_length__, 
-                                       self.slider_hight__], axisbg=axcolor)
+                                       self.slider_hight__], facecolor=axcolor)
 
         fontsize = self.prop_ifs.annotations[0].get_fontsize()
 
@@ -93,7 +93,7 @@ class WidgetsSimple(object):
         self.alpha_slax = plt.axes([self.x_start__, 
                     self.y_start__ + 1*( self.slider_hight__ + self.text_hight__), 
                                        self.slider_length__, 
-                                       self.slider_hight__], axisbg=axcolor)
+                                       self.slider_hight__], facecolor=axcolor)
         
         alpha = self.prop_ifs.holder.get_alpha()
 
@@ -125,7 +125,7 @@ class WidgetsSimple(object):
         self.radius_slax = plt.axes([self.x_start__, 
                  self.y_start__ + 0*( self.slider_hight__ + self.text_hight__), 
                                     self.slider_length__, 
-                                    self.slider_hight__], axisbg=axcolor)
+                                    self.slider_hight__], facecolor=axcolor)
         
         self.w_sl_radius = Slider(self.radius_slax, ' ', 5, 100,
                         valinit=self.prop_ifs.get_markersize())
@@ -159,7 +159,7 @@ class WidgetsSimple(object):
         self.rax_showlines = plt.axes([self.x_start__ + self.slider_length__ + self.text_length__, 
                                        self.y_start__,
                                        self.button_length__,
-                                       self.button_height__], axisbg=axcolor)
+                                       self.button_height__], facecolor=axcolor)
 
         visible = self.prop_ifs.holder.get_visible()
         linestyle = self.prop_ifs.holder.get_linestyle()
@@ -218,7 +218,7 @@ class WidgetsSimpleTopo(WidgetsSimple):
     def recreate_widgets_(self, active_prop):
         super().recreate_widgets_(active_prop)
         self._recreate_save_ifs_button()
-        self._recreate_show_operators_check_button()
+#        self._recreate_show_operators_check_button()
 
     def _recreate_save_ifs_button(self):
     
@@ -233,7 +233,7 @@ class WidgetsSimpleTopo(WidgetsSimple):
                             + self.text_length__ + self.button_length__,
                                        self.y_start__, 
                                        self.button_length__, 
-                                       self.button_height__], axisbg=axcolor)
+                                       self.button_height__], facecolor=axcolor)
         self.w_bt_save = Button(self.save_btax, 'Save \nIFS')
 
         
@@ -249,7 +249,7 @@ class WidgetsSimpleTopo(WidgetsSimple):
                             + self.text_length__ + 2* self.button_length__, 
                                        self.y_start__,
                                        self.button_length__,
-                                       self.button_height__], axisbg=axcolor)
+                                       self.button_height__], facecolor=axcolor)
 
         visible = self.prop_ifs.holder.get_visible()
         linestyle = self.prop_ifs.holder.get_linestyle()
@@ -335,7 +335,7 @@ class WidgetsBasic(WidgetsSimple):
             self.rax_activeifs.cla()
         self.rax_activeifs = plt.axes([0.2+self.button_length__+0.01, 0.05, 
                                        self.button_length__,
-                                       self.button_height__], axisbg=axcolor)
+                                       self.button_height__], facecolor=axcolor)
         activecolor = self.active_prop.get_color()
         self.w_rad_active_ifs = \
                 RadioButtons(self.rax_activeifs,

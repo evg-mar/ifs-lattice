@@ -1,0 +1,8 @@
+{
+    "alpha0": 0.5,
+    "alpha": 0.8,
+    "beta0": 0.3,
+    "beta": 0.5,
+    "gamma_a": 0.4,
+    "gamma_b": 0.65
+}

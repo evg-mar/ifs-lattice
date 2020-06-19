@@ -18,7 +18,7 @@ class PropertiesIFSTopo(PropertiesIFS):
     def __init__(self, label=None,
                        holder=None,
                        topo_const=None,
-                       radius=5,
+                       radius=3,
                        annotations=None,
                        alpha_marker=0.5, 
                        labels_size=12,
@@ -28,17 +28,18 @@ class PropertiesIFSTopo(PropertiesIFS):
                        showedges=False,
                        showlabels=False):
     
-        super(PropertiesIFSTopo, self).__init__(label,
-                       holder,
-                       radius,
-                       annotations,
-                       alpha_marker, 
-                       labels_size,
-                       show_ann,
-                       hide_ifs,
-                       showverts,
-                       showedges,
-                       showlabels)
+        super(PropertiesIFSTopo, self).__init__(
+                       label=label,
+                       holder=holder,
+                       radius=radius,
+                       annotations=annotations,
+                       alpha_marker=alpha_marker,
+                       labels_size=labels_size,
+                       show_ann=show_ann,
+                       hide_ifs=hide_ifs,
+                       showverts=showverts,
+                       showedges=showedges,
+                       showlabels=showlabels)
 
         self.topo_const = topo_const
         self.axes = self.holder.axes
@@ -70,7 +71,9 @@ class PropertiesIFSTopo(PropertiesIFS):
         topo_const = TopoConst.from_json(json_path_topoconst, ax)
         prop = PropertiesIFS.from_json(json_path_prop, ax, bins, rotation,
                                        color=color,
-                                       marker=marker)
+                                       marker=marker,
+                                       # radius=radius
+                                       )
         return PropertiesIFSTopo.from_property_topoconst(prop, topo_const)
 
 
@@ -127,7 +130,7 @@ class PropertiesIFSTopoGeneral(PropertiesIFS):
     def __init__(self, label=None,
                        holder=None,
                        topo_const=None,
-                       radius=5,
+                       radius=2,
                        annotations=None,
                        alpha_marker=0.5, 
                        labels_size=12,
@@ -755,17 +758,19 @@ class TopoConst(object):
 ############################
 
 class TopoConstGeneral(object):
-    def __init__(self, ax, 
+    def __init__(self,
+                 ax,
                  alpha, 
                  beta, 
                  gamma_a, 
                  gamma_b, 
                  alpha0=0.0, 
                  beta0=0.0, 
-                 companion=None):       
+                 companion=None):
 
         assert alpha + beta <= 1.0
 
+        fontsize=10
         
         self.companion = companion
          
@@ -816,28 +821,31 @@ class TopoConstGeneral(object):
 
         self.alpha_ann0 =   self.axes.annotate(r'$\alpha_1$', 
                     (self.alpha0,0.0), 
-                    xytext=(self.alpha0-0.01,-0.08), fontsize=20)
+                    xytext=(self.alpha0-0.01,-0.01), fontsize=fontsize)
  
         self.beta_ann0 =   self.axes.annotate(r'$\beta_1$', 
                     (0.0, self.beta0), 
-                    xytext=(-0.05, self.beta0-0.01), fontsize=20)
+                    xytext=(-0.05, self.beta0-0.01), fontsize=fontsize)
 
 
-        self.alpha_ann =   self.axes.annotate(r'$\alpha_2$', 
+        self.alpha_ann =   self.axes.annotate(r'$\alpha_2$',
                     (self.alpha,0.0), 
-                    xytext=(self.alpha-0.01,-0.08), fontsize=20)
+                    xytext=(self.alpha-0.01,
+                            -0.01),
+                    fontsize=fontsize)
  
         self.beta_ann =   self.axes.annotate(r'$\beta_2$', 
                     (0.0, self.beta), 
-                    xytext=(-0.05, self.beta-0.01), fontsize=20)
+                    xytext=(-0.05, self.beta-0.01), fontsize=fontsize)
  
         self.gamma_a_ann = self.axes.annotate(r'$\gamma_{\alpha}.\Delta_\alpha$', 
-             (self.alpha0+ dAlpha*self.gamma_a, 0.0), 
-             fontsize=20)
+             (self.alpha0+ dAlpha*self.gamma_a, 0.01),
+             xytext=(self.alpha0+ dAlpha*self.gamma_a-0.05, .01),  #rotation=45,
+             fontsize=10)
   
         self.gamma_b_ann = self.axes.annotate(r'$\gamma_{\beta}.\Delta_\beta$', 
              (0.0, self.beta0+dBeta*self.gamma_b), 
-             fontsize=20)
+             fontsize=fontsize)
 
 
         self.set_annotations_general()
@@ -1128,11 +1136,13 @@ if __name__ == '__main__':
 
 
     #############
-    json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'    
+    # json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'
+    # json_path = os.getcwd()
+    json_path = os.path.join(os.getcwd(),'ifsholder')
     json_prop_name = 'property01.json'
     
-    json_path = '/home/evgeniy/Documents/These_PhD/example_ifs_json/working_dir/'
-    json_prop_name = 'ifs01_ax01_.json'
+    # json_path = '/home/evgeniy/Documents/These_PhD/example_ifs_json/working_dir/'
+    # json_prop_name = 'ifs01_ax01_.json'
 #    prop01 = PropertiesIFS.from_json(json_path + json_prop_name, 
 #                                    ax, 
 #                                     bins=10, 
@@ -1141,7 +1151,7 @@ if __name__ == '__main__':
 #    prop01.init_default(ax)
 
     json_topoconst = 'topo_const_config_general.json'
-    json_topoconst = 'topo_const01_.json'
+    # json_topoconst = 'topo_const01_.json'
 #    topo_c0201 = TopoConst.from_json(ax=ax, 
 #                           json_path=json_path+json_name)
 
@@ -1192,21 +1202,39 @@ if __name__ == '__main__':
 
 #  GENERAL
 
-    prop_topoG = PropertiesIFSTopoGeneral.from_json(json_path + json_prop_name, 
-                                             json_path + json_topoconst,
-                                             ax, 
-                                             bins=10, 
-                                             rotation={'x':45, 'y':0})
- 
- 
-    prop_topo_clG = PropertiesIFSTopoGeneral.from_json(json_path + json_prop_name, 
-                                             json_path + json_topoconst,
-                                             ax, 
-                                             bins=10, 
+    # prop_topoG =    PropertiesIFSTopoGeneral.from_json(os.path.join(json_path , json_prop_name),
+    #                                          os.path.join( json_path,json_topoconst),
+    #                                          ax,
+    #                                          bins=10,
+    #                                          rotation={'x':45, 'y':0})
+    #
+    #
+
+    # topo_const = TopoConstGeneral.from_json(os.path.join(json_path, json_topoconst), ax)
+    #
+    # topo_const.fill_fixed()
+
+    prop_topo_clG = PropertiesIFSTopoGeneral.from_json( os.path.join(json_path, json_prop_name),
+                                             os.path.join(json_path, json_topoconst),
+                                             ax,
+                                             bins=10,
                                              rotation={'x':45, 'y':0},
                                              color='red',
                                              marker="^")
-     
+
+
+    # prop_topo_clG = PropertiesIFSTopoInteractive.from_json( os.path.join(json_path, json_prop_name),
+    #                                                     os.path.join(json_path, json_topoconst),
+    #                                                     ax,
+    #                                                     bins=10,
+    #                                                     rotation={'x':45, 'y':0},
+    #                                                     color='red',
+    #                                                     marker="^")
+    #
+
+
+    print('radius: ', prop_topo_clG.radius)
+
     prop_topo_clG.topo_const.fill_fixed()
     prop_topo_clG.applyClosure()
 
@@ -1228,7 +1256,7 @@ if __name__ == '__main__':
     ax.set_ylim([-0.15, 1.15])
     
 
-
+    ax.set_aspect('equal', adjustable='box')
 
 #     print(prop_topo.holder)
 #     print(prop_topo.holder.axes)

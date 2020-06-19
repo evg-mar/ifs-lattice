@@ -1,10 +1,8 @@
 # draggable rectangle with the animation blit techniques; see
 # http://www.scipy.org/Cookbook/Matplotlib/Animations
 
-from matplotlib.patches import Rectangle, Circle
+from matplotlib.patches import Circle
 
-
-from intuitionistic_fuzzy_set import IFS
 
 class HolderCircle(Circle):
     
@@ -28,6 +26,7 @@ class HolderCircle(Circle):
         
         self.axes = axes
         self.axes.add_patch(self)
+        self.annotation = None
         # label, facecolor, edgecolor, get_visible, get_alpha
 
         if self.get_label() != '' and show_annotation == True:
@@ -43,6 +42,12 @@ class HolderCircle(Circle):
     def __str__(self):
         return self._label + super(HolderCircle, self).__str__()
     
+    def set_annotation_visible(self, show_annotation):
+        self.annotation.set_visible(show_annotation)
+        
+    def get_annotation_visible(self):
+        return self.annotation.get_visible()
+        
     def set_animated(self, value):
 #         print("in set animated...")
         super(HolderCircle, self).set_animated(value)
@@ -57,7 +62,15 @@ class HolderCircle(Circle):
         self.annotation = self.axes.annotate(str(label),
                                      self.center,
                                      fontsize='medium') #, zorder=10)
+    
+    # @property
+    def annotation_size(self):
+        return self.annotation.get_fontsize()
 
+    # @property
+    def set_annotation_size(self, annotation_size):
+        return self.annotation.set_fontsize(annotation_size)        
+        
     def draw_blit(self):
         canvas = self.axes.figure.canvas
 #        canvas = self.rect.figure.canvas
@@ -83,6 +96,9 @@ class HolderCircle(Circle):
 
 #     @property
     def get_munu(self):
+        return self.center
+        
+    def get_center(self):
         return self.center
     
     def set_mu(self, mu):      

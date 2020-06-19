@@ -125,7 +125,7 @@ def plot_membership_3Dhistogram(ifs,
 
     rotate_axislabels(ax, angles={'x':-45,'y':45})
 
-    ax.set_zlabel('Number of occurences per area (square)', labelpad=20)
+    ax.set_zlabel('Number of occurences per area', labelpad=20)
     ###########
     ax.set_zlim3d(0, zLimit + 0.5)
       

@@ -207,7 +207,7 @@ class PropertiesIFS(PropertiesAnnotations):
     epsilon = 0.02
     def __init__(self, label=None,
                        holder=None,
-                       radius=5,
+                       radius=2,
                        annotations=None,
                        alpha_marker=0.5, 
                        labels_size=12,
@@ -269,7 +269,7 @@ class PropertiesIFS(PropertiesAnnotations):
 
     @classmethod
     def from_json(cls, json_path, ax, bins, rotation, 
-                  color=None, marker=None, alpha=None):
+                  color=None, marker=None, alpha=None, markersize=None):
         
         with open(json_path) as data_file:    
             data = json.load(data_file, object_pairs_hook=col.OrderedDict)
@@ -279,7 +279,9 @@ class PropertiesIFS(PropertiesAnnotations):
             marker = marker if marker is not None else data['marker']
             alpha = alpha if alpha is not None else data['contrast']
             color = color if color is not None else data['color']
-   
+            markersize = markersize if markersize is not None else data['markersize']
+
+
             ifs_holder = list(data['data'].values())
             indices = range(len(ifs_holder))
             dat = list(map(tuple, ifs_holder))
@@ -292,6 +294,7 @@ class PropertiesIFS(PropertiesAnnotations):
             ax_01, line2d1_01 = plot_triangular_(ax,
                                             mus, nus, rang=1.0, bins=10,
                                             rotation={'x':45, 'y':0},
+                                            markersize=markersize,
                                             color=color,
                                             marker=marker,
                                             alpha=alpha)
@@ -299,7 +302,7 @@ class PropertiesIFS(PropertiesAnnotations):
             ax_01.set_xlabel(r'$\mu$', fontsize=20)
             
             line2d1_01.set_linestyle(' ')
-            line2d1_01.set_markersize(data['marker_size'])
+            # line2d1_01.set_markersize(data['marker_size'])
             line2d1_01.set_markerfacecolor(color)
             line2d1_01.set_color(color)
         #     line2d1_01.set_marker(marker=r'$\odot$')

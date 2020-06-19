@@ -47,7 +47,7 @@ class TopoConstBarInteractive(EditableRectangle):
 
     def set_nu(self, nu):
         super(TopoConstBarInteractive, self).set_nu(nu)
-        nu = self.get_nu()
+        nu = self.get_nu
         height = self.rect.get_height()
         self.line2dbeta.set_ydata([height-nu, height - nu])
 

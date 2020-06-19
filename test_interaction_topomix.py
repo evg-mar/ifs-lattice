@@ -464,8 +464,11 @@ if __name__ == '__main__':
 
 
     json_path = '/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/'
+    import os
+    json_path = os.path.join( os.getcwd(), 'ifsholder')
     json_prop_name = 'property01.json'
-    axlines[ax_01][0].save_to_json(json_path + json_prop_name,
-                                   json_path + 'topo_const_config.json')
+    axlines[ax_01][0].save_to_json( os.path.join(json_path + json_prop_name),
+                                                 os.path.join( json_path ,'topo_const_config.json')
+                                    )
     
     print('Finish and save...')

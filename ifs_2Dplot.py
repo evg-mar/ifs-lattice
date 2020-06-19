@@ -102,7 +102,7 @@ def plot_stack(ifs):
     # plt.show()
 
 
-def plot_bar_Intuitionistic(ifs, plot_pi=False):
+def plot_bar_type_1(ifs, plot_pi=False):
     """
     plot stack bars type = 'intuitionistic' type only
     """    
@@ -125,12 +125,12 @@ def plot_bar_Intuitionistic(ifs, plot_pi=False):
     ax0.set_ylabel('Degrees')
     
     plt.legend(loc='upper right')
-    plt.title('Intuitionistic type stack bars')
+    plt.title('Type 1 stack bars')
     
     # plt.show()
     
     
-def plot_bar_intValued(ifs):
+def plot_bar_type_2(ifs):
     """
     plot stack bars type = 'interval valued' type only
     """    
@@ -149,7 +149,7 @@ def plot_bar_intValued(ifs):
     ax0.set_ylabel('Degrees')
     
     plt.legend(loc='upper right')
-    plt.title('2 type stack bars')
+    plt.title('Type 2 Stack Bars')
     
     # plt.show()
     
@@ -211,6 +211,7 @@ def plot_triangular_(ax,
                     colors={'mu':'b', 'nu':'g', 'elem':'r'},
                     rotation=None,
                     marker='o',
+                    markersize=2,
                     alpha=0.4,
                     color='b'):
     assert(type(bins) in [int, dict])
@@ -238,7 +239,7 @@ def plot_triangular_(ax,
     
     line2d_, = axScatter.plot(mus, nus, 
                               marker=marker, markerfacecolor=colors['elem'],
-                              linestyle=' ', color=color, alpha=alpha)
+                              linestyle=' ', color=color, alpha=alpha,markersize=markersize)
 
     if rotation is not None:
         rotate_axislabels(axScatter, rotation)

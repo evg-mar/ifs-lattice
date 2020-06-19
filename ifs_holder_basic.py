@@ -59,8 +59,9 @@ class IfsHolderBasic(object):
 
 if __name__ == '__main__':
 #     from ifs_holder_basic import IfsHolderBasic
+    filepath = os.path.join(os.getcwd() , 'ifsholder/ifs_holder.csv')
 
-    ifs_basic = IfsHolderBasic('/home/evgeniy/Documents/IFS-Simulator/ifs-lattice/ifsholder/ifs_holder.csv',
+    ifs_basic = IfsHolderBasic(filepath,
                               None)
     print(ifs_basic.get_mus)
 #     print(ifs_basic.df_ifs)
